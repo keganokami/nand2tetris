@@ -1,0 +1,27 @@
+# Java compiled files
+*.class
+
+# Package files
+*.jar
+*.war
+*.ear
+
+# Build directories
+build/
+lib/
+src/
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Claude Code
+.claude/
