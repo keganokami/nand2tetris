@@ -30,30 +30,50 @@ javac -d bin src/*.java
 java -cp bin Assembler tasks/Add.asm
 ```
 
-### VM - VMトランスレータ（プロジェクト7）
+### VM - VMトランスレータ（プロジェクト7 & 8）
 
 スタックベースのVM言語をHackアセンブリ言語に変換するトランスレータ実装。
 
 ```
 VM/
-├── src/          # Javaソースコード
-├── bin/          # コンパイル済みクラスファイル
-├── tasks/        # 課題フォルダ
-│   ├── StackArithmetic/
-│   └── MemoryAccess/
-└── README.md     # 詳細なドキュメント
+├── src/              # Javaソースコード
+│   ├── Parser.java       # VMコマンド解析
+│   ├── CodeWriter.java   # アセンブリ生成
+│   ├── VMTranslator.java # メインクラス
+│   ├── Parser.md         # 解説ドキュメント
+│   ├── CodeWriter.md
+│   ├── VMTranslator.md
+│   └── Chapter8.md       # 8章の解説
+├── bin/              # コンパイル済みクラスファイル
+├── tasks/            # 課題フォルダ
+│   ├── StackArithmetic/  # プロジェクト7
+│   ├── MemoryAccess/     # プロジェクト7
+│   ├── ProgramFlow/      # プロジェクト8
+│   └── FunctionCalls/    # プロジェクト8
+├── README.md
+└── PROJECT8.md       # プロジェクト8の詳細解説
 ```
 
-**実装機能:**
+**実装機能（プロジェクト7）:**
 - スタック演算（push/pop）
 - 算術/論理演算（add, sub, neg, eq, gt, lt, and, or, not）
 - メモリセグメント（constant, local, argument, this, that, temp, pointer, static）
+
+**実装機能（プロジェクト8）:**
+- プログラムフロー制御（label, goto, if-goto）
+- 関数呼び出し（function, call, return）
+- ブートストラップコード（SP初期化、Sys.init呼び出し）
 
 **使用方法:**
 ```bash
 cd VM
 javac -d bin src/*.java
+
+# 単一ファイル変換
 java -cp bin VMTranslator tasks/StackArithmetic/SimpleAdd/SimpleAdd.vm
+
+# ディレクトリ変換（複数.vmファイル → 1つの.asm）
+java -cp bin VMTranslator tasks/FunctionCalls/FibonacciElement
 ```
 
 ## コース概要
@@ -69,7 +89,7 @@ java -cp bin VMTranslator tasks/StackArithmetic/SimpleAdd/SimpleAdd.vm
 - ✅ プロジェクト5: コンピュータアーキテクチャ
 - ✅ プロジェクト6: アセンブラ（ASMBR）
 - ✅ プロジェクト7: VMトランスレータ I - スタック演算（VM）
-- ⬜ プロジェクト8: VMトランスレータ II - プログラムフロー
+- ✅ プロジェクト8: VMトランスレータ II - プログラムフロー（VM）
 - ⬜ プロジェクト9: 高級言語
 - ⬜ プロジェクト10: コンパイラ I - 構文解析
 - ⬜ プロジェクト11: コンパイラ II - コード生成
