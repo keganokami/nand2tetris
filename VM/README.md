@@ -1,4 +1,4 @@
-# VM Translator - Nand2Tetris Project 7
+# VM Translator - Nand2Tetris Project 7 & 8
 
 Nand2TetrisプロジェクトのVMトランスレータ実装です。
 スタックベースのVMコードをHackアセンブリ言語に変換します。
@@ -171,11 +171,23 @@ A=A-1
 M=D+M
 ```
 
-## 今後の実装（プロジェクト8）
+## 実装機能（プロジェクト8）
 
-- プログラムフロー：`label`, `goto`, `if-goto`
-- 関数呼び出し：`function`, `call`, `return`
-- ブートストラップコード
+### プログラムフロー制御
+- `label ラベル名` - ラベルを定義
+- `goto ラベル名` - 無条件ジャンプ
+- `if-goto ラベル名` - スタックトップが0以外ならジャンプ
+
+### 関数呼び出し
+- `function 関数名 ローカル変数数` - 関数定義
+- `call 関数名 引数数` - 関数呼び出し
+- `return` - 関数からの復帰
+
+### ブートストラップコード
+- SP=256で初期化
+- Sys.init関数を呼び出し
+
+詳細は[PROJECT8.md](PROJECT8.md)を参照してください。
 
 ## 参考資料
 
@@ -186,6 +198,13 @@ M=D+M
   - BasicTest
   - PointerTest
   - StaticTest
+- プロジェクト8の課題：
+  - BasicLoop
+  - FibonacciSeries
+  - SimpleFunction
+  - NestedCall
+  - FibonacciElement
+  - StaticsTest
 
 ## ライセンス
 
