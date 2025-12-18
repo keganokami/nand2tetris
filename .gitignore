@@ -9,7 +9,6 @@
 # Build directories
 build/
 lib/
-src/
 
 # IDE files
 .idea/
