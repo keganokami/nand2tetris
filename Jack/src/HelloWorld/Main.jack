@@ -1,0 +1,11 @@
+// Hello World プログラム
+// Nand2Tetris 第9章 - 最初のJackプログラム
+
+class Main {
+    /** プログラムのエントリポイント */
+    function void main() {
+        do Output.printString("Hello, World!");
+        do Output.println();
+        return;
+    }
+}

@@ -1,0 +1,104 @@
+// 四角形クラス
+// 画面上に四角形を描画し、移動させる
+
+class Square {
+    field int x, y;       // 左上の座標
+    field int size;       // サイズ
+
+    /** 新しい四角形を作成 */
+    constructor Square new(int ax, int ay, int aSize) {
+        let x = ax;
+        let y = ay;
+        let size = aSize;
+        do draw();
+        return this;
+    }
+
+    /** 四角形を解放 */
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /** 四角形を描画（黒で塗りつぶし） */
+    method void draw() {
+        do Screen.setColor(true);
+        do Screen.drawRectangle(x, y, x + size, y + size);
+        return;
+    }
+
+    /** 四角形を消去（白で塗りつぶし） */
+    method void erase() {
+        do Screen.setColor(false);
+        do Screen.drawRectangle(x, y, x + size, y + size);
+        return;
+    }
+
+    /** サイズを大きくする */
+    method void incSize() {
+        if (((y + size) < 254) & ((x + size) < 510)) {
+            do erase();
+            let size = size + 2;
+            do draw();
+        }
+        return;
+    }
+
+    /** サイズを小さくする */
+    method void decSize() {
+        if (size > 2) {
+            do erase();
+            let size = size - 2;
+            do draw();
+        }
+        return;
+    }
+
+    /** 上に移動 */
+    method void moveUp() {
+        if (y > 1) {
+            do Screen.setColor(false);
+            do Screen.drawRectangle(x, (y + size) - 1, x + size, y + size);
+            let y = y - 2;
+            do Screen.setColor(true);
+            do Screen.drawRectangle(x, y, x + size, y + 1);
+        }
+        return;
+    }
+
+    /** 下に移動 */
+    method void moveDown() {
+        if ((y + size) < 254) {
+            do Screen.setColor(false);
+            do Screen.drawRectangle(x, y, x + size, y + 1);
+            let y = y + 2;
+            do Screen.setColor(true);
+            do Screen.drawRectangle(x, (y + size) - 1, x + size, y + size);
+        }
+        return;
+    }
+
+    /** 左に移動 */
+    method void moveLeft() {
+        if (x > 1) {
+            do Screen.setColor(false);
+            do Screen.drawRectangle((x + size) - 1, y, x + size, y + size);
+            let x = x - 2;
+            do Screen.setColor(true);
+            do Screen.drawRectangle(x, y, x + 1, y + size);
+        }
+        return;
+    }
+
+    /** 右に移動 */
+    method void moveRight() {
+        if ((x + size) < 510) {
+            do Screen.setColor(false);
+            do Screen.drawRectangle(x, y, x + 1, y + size);
+            let x = x + 2;
+            do Screen.setColor(true);
+            do Screen.drawRectangle((x + size) - 1, y, x + size, y + size);
+        }
+        return;
+    }
+}

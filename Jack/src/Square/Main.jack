@@ -1,0 +1,13 @@
+// 四角形描画プログラム
+// Nand2Tetris 第9章 - グラフィックスとキーボード入力
+
+class Main {
+    /** メイン関数 - SquareGameを開始 */
+    function void main() {
+        var SquareGame game;
+        let game = SquareGame.new();
+        do game.run();
+        do game.dispose();
+        return;
+    }
+}

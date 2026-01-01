@@ -1,0 +1,64 @@
+// 四角形ゲームクラス
+// キーボードで四角形を操作する
+
+class SquareGame {
+    field Square square;      // 操作する四角形
+    field int direction;      // 現在の移動方向
+
+    /** 新しいゲームを作成 */
+    constructor SquareGame new() {
+        // 画面中央に四角形を作成
+        let square = Square.new(230, 110, 30);
+        let direction = 0;  // 0 = 静止
+        return this;
+    }
+
+    /** ゲームを解放 */
+    method void dispose() {
+        do square.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /** ゲームを実行 */
+    method void run() {
+        var char key;
+        var boolean exit;
+
+        let exit = false;
+
+        while (~exit) {
+            // キー入力を待機
+            while (key = 0) {
+                let key = Keyboard.keyPressed();
+                do moveSquare();
+            }
+
+            // キーに応じた処理
+            if (key = 81) { let exit = true; }      // Q - 終了
+            if (key = 90) { do square.decSize(); }  // Z - 縮小
+            if (key = 88) { do square.incSize(); }  // X - 拡大
+            if (key = 131) { let direction = 1; }   // 上矢印
+            if (key = 133) { let direction = 2; }   // 下矢印
+            if (key = 130) { let direction = 3; }   // 左矢印
+            if (key = 132) { let direction = 4; }   // 右矢印
+
+            // キーが離されるまで待機
+            while (~(key = 0)) {
+                let key = Keyboard.keyPressed();
+                do moveSquare();
+            }
+        }
+        return;
+    }
+
+    /** 方向に応じて四角形を移動 */
+    method void moveSquare() {
+        if (direction = 1) { do square.moveUp(); }
+        if (direction = 2) { do square.moveDown(); }
+        if (direction = 3) { do square.moveLeft(); }
+        if (direction = 4) { do square.moveRight(); }
+        do Sys.wait(5);  // アニメーションを滑らかにするための遅延
+        return;
+    }
+}

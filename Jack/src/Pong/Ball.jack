@@ -1,0 +1,91 @@
+// ボールクラス
+// 画面内を移動し、壁で跳ね返る
+
+class Ball {
+    field int x, y;         // ボールの中心座標
+    field int dx, dy;       // 移動速度
+    field int radius;       // 半径
+
+    /** 新しいボールを作成 */
+    constructor Ball new(int ax, int ay, int aRadius) {
+        let x = ax;
+        let y = ay;
+        let radius = aRadius;
+        let dx = 2;
+        let dy = 2;
+        do draw();
+        return this;
+    }
+
+    /** ボールを解放 */
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /** ボールを描画 */
+    method void draw() {
+        do Screen.setColor(true);
+        do Screen.drawCircle(x, y, radius);
+        return;
+    }
+
+    /** ボールを消去 */
+    method void erase() {
+        do Screen.setColor(false);
+        do Screen.drawCircle(x, y, radius);
+        return;
+    }
+
+    /** ボールを移動 */
+    method void move() {
+        do erase();
+
+        let x = x + dx;
+        let y = y + dy;
+
+        // 左右の壁で反射
+        if ((x - radius) < 1) {
+            let x = radius + 1;
+            let dx = -dx;
+        }
+        if ((x + radius) > 510) {
+            let x = 510 - radius;
+            let dx = -dx;
+        }
+
+        // 上下の壁で反射
+        if ((y - radius) < 1) {
+            let y = radius + 1;
+            let dy = -dy;
+        }
+        if ((y + radius) > 254) {
+            let y = 254 - radius;
+            let dy = -dy;
+        }
+
+        do draw();
+        return;
+    }
+
+    /** X座標を取得 */
+    method int getX() {
+        return x;
+    }
+
+    /** Y座標を取得 */
+    method int getY() {
+        return y;
+    }
+
+    /** 半径を取得 */
+    method int getRadius() {
+        return radius;
+    }
+
+    /** Y方向を反転 */
+    method void bounceY() {
+        let dy = -dy;
+        return;
+    }
+}

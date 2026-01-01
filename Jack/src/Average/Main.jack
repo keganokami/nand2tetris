@@ -1,0 +1,51 @@
+// 平均値計算プログラム
+// Nand2Tetris 第9章 - 配列と入出力の練習
+
+class Main {
+    /**
+     * ユーザーから複数の数値を入力してもらい、
+     * その平均値を計算して
+     */
+    function void main() {
+        var Array numbers;
+        var int count, i, sum, avg;
+        var int value;
+
+        // 入力する数の個数を取得
+        do Output.printString("How many numbers? ");
+        let count = Keyboard.readInt("");
+
+        // 配列を確保
+        let numbers = Array.new(count);
+
+        // 数値を入力
+        let i = 0;
+        while (i < count) {
+            do Output.printString("Enter number ");
+            do Output.printInt(i + 1);
+            do Output.printString(": ");
+            let numbers[i] = Keyboard.readInt("");
+            let i = i + 1;
+        }
+
+        // 合計を計算
+        let sum = 0;
+        let i = 0;
+        while (i < count) {
+            let sum = sum + numbers[i];
+            let i = i + 1;
+        }
+
+        // 平均を計算して表示
+        let avg = sum / count;
+        do Output.println();
+        do Output.printString("Average = ");
+        do Output.printInt(avg);
+        do Output.println();
+
+        // メモリを解放
+        do numbers.dispose();
+
+        return;
+    }
+}

@@ -1,0 +1,77 @@
+// パドルクラス
+// プレイヤーが操作するパドル
+
+class Paddle {
+    field int x, y;         // 左上座標
+    field int width, height; // サイズ
+
+    /** 新しいパドルを作成 */
+    constructor Paddle new(int ax, int ay, int aWidth, int aHeight) {
+        let x = ax;
+        let y = ay;
+        let width = aWidth;
+        let height = aHeight;
+        do draw();
+        return this;
+    }
+
+    /** パドルを解放 */
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /** パドルを描画 */
+    method void draw() {
+        do Screen.setColor(true);
+        do Screen.drawRectangle(x, y, x + width, y + height);
+        return;
+    }
+
+    /** パドルを消去 */
+    method void erase() {
+        do Screen.setColor(false);
+        do Screen.drawRectangle(x, y, x + width, y + height);
+        return;
+    }
+
+    /** 上に移動 */
+    method void moveUp() {
+        if (y > 5) {
+            do erase();
+            let y = y - 5;
+            do draw();
+        }
+        return;
+    }
+
+    /** 下に移動 */
+    method void moveDown() {
+        if ((y + height) < 250) {
+            do erase();
+            let y = y + 5;
+            do draw();
+        }
+        return;
+    }
+
+    /** Y座標を取得 */
+    method int getY() {
+        return y;
+    }
+
+    /** 高さを取得 */
+    method int getHeight() {
+        return height;
+    }
+
+    /** X座標を取得 */
+    method int getX() {
+        return x;
+    }
+
+    /** 幅を取得 */
+    method int getWidth() {
+        return width;
+    }
+}

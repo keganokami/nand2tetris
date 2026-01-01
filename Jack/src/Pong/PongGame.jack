@@ -1,0 +1,109 @@
+// Pongゲームクラス
+// ゲームのメインループを管理
+
+class PongGame {
+    field Ball ball;
+    field Paddle paddle;
+    field int score;
+    field boolean exit;
+
+    /** 新しいゲームを作成 */
+    constructor PongGame new() {
+        // 画面中央にボール、左端にパドル
+        let ball = Ball.new(256, 128, 5);
+        let paddle = Paddle.new(10, 100, 8, 50);
+        let score = 0;
+        let exit = false;
+        return this;
+    }
+
+    /** ゲームを解放 */
+    method void dispose() {
+        do ball.dispose();
+        do paddle.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /** ゲームを実行 */
+    method void run() {
+        var char key;
+
+        do drawBorder();
+        do showScore();
+
+        while (~exit) {
+            // キー入力処理
+            let key = Keyboard.keyPressed();
+            if (key = 81) { let exit = true; }      // Q - 終了
+            if (key = 131) { do paddle.moveUp(); }   // 上矢印
+            if (key = 133) { do paddle.moveDown(); } // 下矢印
+
+            // ボール移動
+            do ball.move();
+
+            // パドルとの衝突判定
+            do checkCollision();
+
+            // ゲームスピード調整
+            do Sys.wait(30);
+        }
+
+        do showGameOver();
+        return;
+    }
+
+    /** 枠線を描画 */
+    method void drawBorder() {
+        do Screen.setColor(true);
+        do Screen.drawLine(0, 0, 511, 0);
+        do Screen.drawLine(0, 255, 511, 255);
+        do Screen.drawLine(511, 0, 511, 255);
+        return;
+    }
+
+    /** スコアを表示 */
+    method void showScore() {
+        do Output.moveCursor(0, 28);
+        do Output.printString("Score: ");
+        do Output.printInt(score);
+        return;
+    }
+
+    /** パドルとボールの衝突判定 */
+    method void checkCollision() {
+        var int ballX, ballY, ballR;
+        var int paddleX, paddleY, paddleW, paddleH;
+
+        let ballX = ball.getX();
+        let ballY = ball.getY();
+        let ballR = ball.getRadius();
+        let paddleX = paddle.getX();
+        let paddleY = paddle.getY();
+        let paddleW = paddle.getWidth();
+        let paddleH = paddle.getHeight();
+
+        // ボールがパドルの範囲内
+        if ((ballX - ballR) < (paddleX + paddleW)) {
+            if ((ballX - ballR) > paddleX) {
+                if ((ballY > paddleY) & (ballY < (paddleY + paddleH))) {
+                    do ball.bounceY();
+                    let score = score + 10;
+                    do showScore();
+                }
+            }
+        }
+
+        return;
+    }
+
+    /** ゲームオーバー表示 */
+    method void showGameOver() {
+        do Output.moveCursor(11, 25);
+        do Output.printString("GAME OVER");
+        do Output.moveCursor(13, 22);
+        do Output.printString("Final Score: ");
+        do Output.printInt(score);
+        return;
+    }
+}

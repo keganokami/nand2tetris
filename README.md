@@ -76,6 +76,36 @@ java -cp bin VMTranslator tasks/StackArithmetic/SimpleAdd/SimpleAdd.vm
 java -cp bin VMTranslator tasks/FunctionCalls/FibonacciElement
 ```
 
+### Jack - Jackプログラム（プロジェクト9）
+
+Jack言語で書かれたサンプルプログラム集。
+
+```
+Jack/
+├── docs/
+│   └── Chapter9.md      # Jack言語の解説
+├── src/
+│   ├── HelloWorld/      # Hello World
+│   ├── Average/         # 平均値計算
+│   ├── Square/          # 四角形操作ゲーム
+│   └── Pong/            # Pongゲーム
+└── README.md
+```
+
+**サンプルプログラム:**
+- HelloWorld: 最初のJackプログラム
+- Average: 配列と入出力の練習
+- Square: キーボードで四角形を操作
+- Pong: シンプルなPongゲーム
+
+**実行方法:**
+```bash
+# Nand2TetrisのJackCompilerでコンパイル
+JackCompiler Jack/src/HelloWorld/
+
+# VMEmulatorで実行
+```
+
 ## コース概要
 
 [Nand2Tetris](https://www.nand2tetris.org/)は、NANDゲートからテトリスまで、コンピュータシステムを下から上まで構築する教育コースです。
@@ -90,7 +120,7 @@ java -cp bin VMTranslator tasks/FunctionCalls/FibonacciElement
 - ✅ プロジェクト6: アセンブラ（ASMBR）
 - ✅ プロジェクト7: VMトランスレータ I - スタック演算（VM）
 - ✅ プロジェクト8: VMトランスレータ II - プログラムフロー（VM）
-- ⬜ プロジェクト9: 高級言語
+- ✅ プロジェクト9: 高級言語（Jack）
 - ⬜ プロジェクト10: コンパイラ I - 構文解析
 - ⬜ プロジェクト11: コンパイラ II - コード生成
 - ⬜ プロジェクト12: オペレーティングシステム

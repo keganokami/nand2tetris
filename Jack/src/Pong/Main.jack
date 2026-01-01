@@ -1,0 +1,13 @@
+// Pongゲーム メインクラス
+// Nand2Tetris 第9章 - シンプルなゲーム実装
+
+class Main {
+    /** メイン関数 - Pongゲームを開始 */
+    function void main() {
+        var PongGame game;
+        let game = PongGame.new();
+        do game.run();
+        do game.dispose();
+        return;
+    }
+}
