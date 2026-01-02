@@ -98,12 +98,48 @@ Jack/
 - Square: キーボードで四角形を操作
 - Pong: シンプルなPongゲーム
 
-**実行方法:**
-```bash
-# Nand2TetrisのJackCompilerでコンパイル
-JackCompiler Jack/src/HelloWorld/
+### JackCompiler - Jackコンパイラ（プロジェクト10 & 11）
 
-# VMEmulatorで実行
+Jack言語をVM言語にコンパイルするコンパイラ実装。
+
+```
+JackCompiler/
+├── src/                          # Javaソースコード
+│   ├── JackTokenizer.java        # 字句解析器
+│   ├── CompilationEngine.java    # 構文解析器（XML出力）
+│   ├── JackAnalyzer.java         # 第10章メイン
+│   ├── SymbolTable.java          # シンボルテーブル
+│   ├── VMWriter.java             # VMコード出力
+│   ├── CompilationEngineVM.java  # コード生成器
+│   └── JackCompiler.java         # 第11章メイン
+├── bin/                          # コンパイル済みクラスファイル
+├── docs/                         # ドキュメント
+│   ├── Chapter10.md              # 第10章（構文解析）解説
+│   └── Chapter11.md              # 第11章（コード生成）解説
+├── README.md
+└── Makefile
+```
+
+**実装機能（プロジェクト10）:**
+- 字句解析（トークナイザ）
+- 再帰下降構文解析
+- XML形式の構文木出力
+
+**実装機能（プロジェクト11）:**
+- シンボルテーブル（変数管理）
+- VMコード生成
+- 式、文、サブルーチンのコンパイル
+
+**使用方法:**
+```bash
+cd JackCompiler
+make compile
+
+# 構文解析（XML出力）
+java -cp bin JackAnalyzer ../Jack/src/Square/
+
+# コンパイル（VMコード出力）
+java -cp bin JackCompiler ../Jack/src/Square/
 ```
 
 ## コース概要
@@ -121,8 +157,8 @@ JackCompiler Jack/src/HelloWorld/
 - ✅ プロジェクト7: VMトランスレータ I - スタック演算（VM）
 - ✅ プロジェクト8: VMトランスレータ II - プログラムフロー（VM）
 - ✅ プロジェクト9: 高級言語（Jack）
-- ⬜ プロジェクト10: コンパイラ I - 構文解析
-- ⬜ プロジェクト11: コンパイラ II - コード生成
+- ✅ プロジェクト10: コンパイラ I - 構文解析（JackCompiler）
+- ✅ プロジェクト11: コンパイラ II - コード生成（JackCompiler）
 - ⬜ プロジェクト12: オペレーティングシステム
 
 ## 開発環境
