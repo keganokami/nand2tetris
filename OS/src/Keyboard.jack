@@ -1,0 +1,140 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Keyboard.jack
+
+/**
+ * キーボード入力を行うライブラリ
+ *
+ * キーボードメモリマップ: RAM[24576]
+ * キーが押されていないとき: 0
+ * キーが押されているとき: そのキーのスキャンコード
+ *
+ * 特殊キーのスキャンコード:
+ *   改行(Enter): 128
+ *   バックスペース: 129
+ *   左矢印: 130
+ *   上矢印: 131
+ *   右矢印: 132
+ *   下矢印: 133
+ *   Home: 134
+ *   End: 135
+ *   Page Up: 136
+ *   Page Down: 137
+ *   Insert: 138
+ *   Delete: 139
+ *   Esc: 140
+ *   F1-F12: 141-152
+ */
+class Keyboard {
+    static int keyboardAddress;
+
+    /** Keyboardライブラリを初期化する */
+    function void init() {
+        let keyboardAddress = 24576;
+        return;
+    }
+
+    /**
+     * 現在押されているキーのスキャンコードを返す
+     * キーが押されていない場合は0を返す
+     */
+    function char keyPressed() {
+        return Memory.peek(keyboardAddress);
+    }
+
+    /**
+     * キーが押されるまで待ち、押されたキーの文字を返す
+     * 押されたキーは画面にエコーされる
+     */
+    function char readChar() {
+        var char key, c;
+
+        // カーソルを表示（簡易版）
+        do Output.printChar(0);
+
+        // キーが押されるのを待つ
+        let key = 0;
+        while (key = 0) {
+            let key = Keyboard.keyPressed();
+        }
+        let c = key;
+
+        // キーが離されるのを待つ
+        while (~(key = 0)) {
+            let key = Keyboard.keyPressed();
+        }
+
+        // カーソルを消去してバックスペース
+        do Output.backSpace();
+
+        // 文字をエコー（印刷可能文字のみ）
+        if ((c > 31) & (c < 127)) {
+            do Output.printChar(c);
+        }
+
+        return c;
+    }
+
+    /**
+     * 行入力を行い、文字列として返す
+     * Enterで入力終了、バックスペースで削除
+     *
+     * message: プロンプトとして表示するメッセージ
+     */
+    function String readLine(String message) {
+        var String line;
+        var char c;
+
+        // プロンプトを表示
+        do Output.printString(message);
+
+        // 入力バッファを作成（最大64文字）
+        let line = String.new(64);
+
+        // 入力ループ
+        while (true) {
+            let c = Keyboard.readChar();
+
+            // Enter (128) で終了
+            if (c = 128) {
+                do Output.println();
+                return line;
+            }
+
+            // バックスペース (129) で削除
+            if (c = 129) {
+                if (line.length() > 0) {
+                    do line.eraseLastChar();
+                    do Output.backSpace();
+                }
+            } else {
+                // 印刷可能文字を追加
+                if ((c > 31) & (c < 127)) {
+                    if (line.length() < 64) {
+                        do line.appendChar(c);
+                    }
+                }
+            }
+        }
+
+        return line;
+    }
+
+    /**
+     * 整数入力を行い、その値を返す
+     * Enterで入力終了、バックスペースで削除
+     *
+     * message: プロンプトとして表示するメッセージ
+     */
+    function int readInt(String message) {
+        var String line;
+        var int val;
+
+        let line = Keyboard.readLine(message);
+        let val = line.intValue();
+        do line.dispose();
+
+        return val;
+    }
+}

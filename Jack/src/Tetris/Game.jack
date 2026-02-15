@@ -1,0 +1,355 @@
+/**
+ * テトリスのゲームロジックを管理するクラス
+ *
+ * 操作方法:
+ *   左矢印: 左に移動
+ *   右矢印: 右に移動
+ *   下矢印: 高速落下
+ *   上矢印/Z: 時計回りに回転
+ *   X: 反時計回りに回転
+ *   スペース: ハードドロップ
+ *   Q: 終了
+ */
+class Game {
+    field Board board;           // ゲームボード
+    field Tetromino currentPiece; // 現在のピース
+    field Tetromino nextPiece;   // 次のピース
+    field int score;             // スコア
+    field int level;             // レベル
+    field int lines;             // 消したライン数
+    field int dropCounter;       // 落下カウンター
+    field int dropSpeed;         // 落下速度（フレーム数）
+    field boolean gameOver;      // ゲームオーバーフラグ
+    static int seed;             // 乱数シード（static）
+
+    /** ゲームを初期化 */
+    constructor Game new() {
+        do Board.init();
+
+        let board = Board.new();
+        let score = 0;
+        let level = 1;
+        let lines = 0;
+        let dropCounter = 0;
+        let dropSpeed = 30;  // 初期落下速度
+        let gameOver = false;
+        let seed = 12345;    // 初期乱数シード
+
+        // 最初のピースを生成
+        let currentPiece = Tetromino.new(Game.random(7));
+        let nextPiece = Tetromino.new(Game.random(7));
+
+        return this;
+    }
+
+    /** ゲームを解放 */
+    method void dispose() {
+        do board.dispose();
+        do currentPiece.dispose();
+        do nextPiece.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /** 簡易乱数生成（0からmax-1までの値を返す） */
+    function int random(int max) {
+        var int result;
+
+        // 16ビット整数に収まる線形合同法
+        // seed = (seed * 181 + 359) mod 32768
+        let seed = seed * 181;
+        let seed = seed + 359;
+        let seed = seed & 32767;  // 正の値にする（0-32767）
+
+        let result = seed;
+
+        // maxで割った余りを返す
+        while (result > (max - 1)) {
+            let result = result - max;
+        }
+        return result;
+    }
+
+    /** 乱数シードを更新（ユーザー入力のタイミングで呼ぶ） */
+    method void updateSeed() {
+        let seed = seed + 1;
+        if (seed > 30000) {
+            let seed = 1;
+        }
+        return;
+    }
+
+    /** ゲームを実行 */
+    method void run() {
+        var char key;
+        var boolean needRedraw;
+
+        // 初期画面を描画
+        do drawUI();
+        do board.draw();
+        do board.drawPiece(currentPiece);
+        do board.drawNextPiece(nextPiece);
+        do drawScore();
+
+        // ゲームループ
+        while (~gameOver) {
+            let needRedraw = false;
+
+            // キー入力を処理
+            let key = Keyboard.keyPressed();
+
+            if (key > 0) {
+                do updateSeed();  // ユーザー入力で乱数シードを更新
+            }
+
+            // 左移動
+            if (key = 130) {
+                do board.erasePiece(currentPiece);
+                do currentPiece.moveLeft();
+                if (board.checkCollision(currentPiece)) {
+                    do currentPiece.moveRight();
+                }
+                let needRedraw = true;
+            }
+
+            // 右移動
+            if (key = 132) {
+                do board.erasePiece(currentPiece);
+                do currentPiece.moveRight();
+                if (board.checkCollision(currentPiece)) {
+                    do currentPiece.moveLeft();
+                }
+                let needRedraw = true;
+            }
+
+            // 下移動（ソフトドロップ）
+            if (key = 133) {
+                do board.erasePiece(currentPiece);
+                do currentPiece.moveDown();
+                if (board.checkCollision(currentPiece)) {
+                    do currentPiece.moveUp();
+                    do lockAndSpawn();
+                } else {
+                    let score = score + 1;  // ソフトドロップボーナス
+                }
+                let needRedraw = true;
+                do drawScore();
+            }
+
+            // 回転（上矢印またはZ）
+            if ((key = 131) | (key = 90)) {
+                do board.erasePiece(currentPiece);
+                do currentPiece.rotateClockwise();
+                if (board.checkCollision(currentPiece)) {
+                    // 壁キック：左右にずらして再試行
+                    do currentPiece.moveLeft();
+                    if (board.checkCollision(currentPiece)) {
+                        do currentPiece.moveRight();
+                        do currentPiece.moveRight();
+                        if (board.checkCollision(currentPiece)) {
+                            do currentPiece.moveLeft();
+                            do currentPiece.rotateCounterClockwise();
+                        }
+                    }
+                }
+                let needRedraw = true;
+            }
+
+            // 反時計回り回転（X）
+            if (key = 88) {
+                do board.erasePiece(currentPiece);
+                do currentPiece.rotateCounterClockwise();
+                if (board.checkCollision(currentPiece)) {
+                    do currentPiece.moveLeft();
+                    if (board.checkCollision(currentPiece)) {
+                        do currentPiece.moveRight();
+                        do currentPiece.moveRight();
+                        if (board.checkCollision(currentPiece)) {
+                            do currentPiece.moveLeft();
+                            do currentPiece.rotateClockwise();
+                        }
+                    }
+                }
+                let needRedraw = true;
+            }
+
+            // ハードドロップ（スペース）
+            if (key = 32) {
+                do board.erasePiece(currentPiece);
+                while (~(board.checkCollision(currentPiece))) {
+                    do currentPiece.moveDown();
+                    let score = score + 2;  // ハードドロップボーナス
+                }
+                do currentPiece.moveUp();
+                let score = score - 2;  // 最後の無効な移動を補正
+                do lockAndSpawn();
+                let needRedraw = true;
+                do drawScore();
+            }
+
+            // 終了（Q）
+            if (key = 81) {
+                let gameOver = true;
+            }
+
+            // 自動落下
+            let dropCounter = dropCounter + 1;
+            if (dropCounter > dropSpeed) {
+                let dropCounter = 0;
+                do board.erasePiece(currentPiece);
+                do currentPiece.moveDown();
+                if (board.checkCollision(currentPiece)) {
+                    do currentPiece.moveUp();
+                    do lockAndSpawn();
+                }
+                let needRedraw = true;
+            }
+
+            // 再描画
+            if (needRedraw) {
+                do board.draw();
+                if (~gameOver) {
+                    do board.drawPiece(currentPiece);
+                }
+            }
+
+            // フレーム待機
+            do Sys.wait(30);
+        }
+
+        // ゲームオーバー表示
+        do drawGameOver();
+
+        return;
+    }
+
+    /** ピースを固定して新しいピースを生成 */
+    method void lockAndSpawn() {
+        var int cleared;
+
+        // 現在のピースを固定
+        do board.lockPiece(currentPiece);
+
+        // ライン消去
+        let cleared = board.clearLines();
+        if (cleared > 0) {
+            let lines = lines + cleared;
+
+            // スコア計算（標準テトリススコアリング）
+            if (cleared = 1) { let score = score + (100 * level); }
+            if (cleared = 2) { let score = score + (300 * level); }
+            if (cleared = 3) { let score = score + (500 * level); }
+            if (cleared = 4) { let score = score + (800 * level); }  // テトリス！
+
+            // レベルアップ（10ライン毎）
+            let level = 1 + (lines / 10);
+            if (level > 15) {
+                let level = 15;
+            }
+
+            // 落下速度を更新
+            let dropSpeed = 30 - (level * 2);
+            if (dropSpeed < 5) {
+                let dropSpeed = 5;
+            }
+
+            do drawScore();
+        }
+
+        // 現在のピースを破棄
+        do currentPiece.dispose();
+
+        // 次のピースを現在のピースに
+        let currentPiece = nextPiece;
+        do currentPiece.setX(3);
+
+        // 新しい次のピースを生成
+        let nextPiece = Tetromino.new(Game.random(7));
+        do board.drawNextPiece(nextPiece);
+
+        // ゲームオーバーチェック
+        if (board.checkCollision(currentPiece)) {
+            let gameOver = true;
+        }
+
+        return;
+    }
+
+    /** UI（枠とラベル）を描画 */
+    method void drawUI() {
+        do Screen.clearScreen();
+
+        // タイトル
+        do Output.moveCursor(0, 7);
+        do Output.printString("TETRIS");
+
+        // ラベル
+        do Output.moveCursor(5, 22);
+        do Output.printString("NEXT");
+
+        do Output.moveCursor(14, 22);
+        do Output.printString("SCORE");
+
+        do Output.moveCursor(17, 22);
+        do Output.printString("LEVEL");
+
+        do Output.moveCursor(20, 22);
+        do Output.printString("LINES");
+
+        // 操作説明
+        do Output.moveCursor(5, 35);
+        do Output.printString("CONTROLS:");
+        do Output.moveCursor(7, 35);
+        do Output.printString("Arrows: Move");
+        do Output.moveCursor(8, 35);
+        do Output.printString("Up/Z: Rotate CW");
+        do Output.moveCursor(9, 35);
+        do Output.printString("X: Rotate CCW");
+        do Output.moveCursor(10, 35);
+        do Output.printString("Space: Drop");
+        do Output.moveCursor(11, 35);
+        do Output.printString("Q: Quit");
+
+        return;
+    }
+
+    /** スコア表示を更新 */
+    method void drawScore() {
+        // スコア
+        do Output.moveCursor(15, 22);
+        do Output.printInt(score);
+        do Output.printString("    ");
+
+        // レベル
+        do Output.moveCursor(18, 22);
+        do Output.printInt(level);
+        do Output.printString("  ");
+
+        // ライン数
+        do Output.moveCursor(21, 22);
+        do Output.printInt(lines);
+        do Output.printString("  ");
+
+        return;
+    }
+
+    /** ゲームオーバー画面 */
+    method void drawGameOver() {
+        do Output.moveCursor(10, 5);
+        do Output.printString("GAME OVER!");
+
+        do Output.moveCursor(12, 5);
+        do Output.printString("Score: ");
+        do Output.printInt(score);
+
+        do Output.moveCursor(14, 5);
+        do Output.printString("Press any key");
+
+        // キー入力待ち
+        while (Keyboard.keyPressed() = 0) {
+            do Sys.wait(50);
+        }
+
+        return;
+    }
+}

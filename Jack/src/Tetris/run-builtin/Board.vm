@@ -1,0 +1,928 @@
+function Board.init 0
+push constant 10
+pop static 0
+push constant 20
+pop static 1
+push constant 10
+pop static 2
+push constant 50
+pop static 3
+push constant 28
+pop static 4
+push constant 0
+return
+function Board.getWidth 0
+push static 0
+return
+function Board.getHeight 0
+push static 1
+return
+function Board.new 1
+push constant 1
+call Memory.alloc 1
+pop pointer 0
+push static 0
+push static 1
+call Math.multiply 2
+call Array.new 1
+pop this 0
+push constant 0
+pop local 0
+label WHILE_EXP0
+push local 0
+push static 0
+push static 1
+call Math.multiply 2
+lt
+not
+if-goto WHILE_END1
+push this 0
+push local 0
+add
+push constant 0
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push local 0
+push constant 1
+add
+pop local 0
+goto WHILE_EXP0
+label WHILE_END1
+push pointer 0
+return
+function Board.dispose 0
+push argument 0
+pop pointer 0
+push this 0
+call Array.dispose 1
+pop temp 0
+push pointer 0
+call Memory.deAlloc 1
+pop temp 0
+push constant 0
+return
+function Board.isCellFilled 0
+push argument 0
+pop pointer 0
+push argument 1
+push constant 0
+lt
+push argument 1
+push static 0
+push constant 1
+sub
+gt
+or
+push argument 2
+push constant 0
+lt
+or
+push argument 2
+push static 1
+push constant 1
+sub
+gt
+or
+not
+if-goto IF_FALSE2
+push constant 0
+not
+return
+goto IF_END3
+label IF_FALSE2
+label IF_END3
+push this 0
+push argument 2
+push static 0
+call Math.multiply 2
+push argument 1
+add
+add
+pop pointer 1
+push that 0
+push constant 1
+eq
+return
+function Board.setCell 0
+push argument 0
+pop pointer 0
+push argument 1
+push constant 1
+neg
+gt
+push argument 1
+push static 0
+lt
+and
+push argument 2
+push constant 1
+neg
+gt
+and
+push argument 2
+push static 1
+lt
+and
+not
+if-goto IF_FALSE4
+push this 0
+push argument 2
+push static 0
+call Math.multiply 2
+push argument 1
+add
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+goto IF_END5
+label IF_FALSE4
+label IF_END5
+push constant 0
+return
+function Board.checkCollision 6
+push argument 0
+pop pointer 0
+push argument 1
+call Tetromino.getX 1
+pop local 4
+push argument 1
+call Tetromino.getY 1
+pop local 5
+push constant 0
+pop local 0
+label WHILE_EXP6
+push local 0
+push constant 4
+lt
+not
+if-goto WHILE_END7
+push constant 0
+pop local 1
+label WHILE_EXP8
+push local 1
+push constant 4
+lt
+not
+if-goto WHILE_END9
+push argument 1
+push local 0
+push local 1
+call Tetromino.getCell 3
+not
+if-goto IF_FALSE10
+push local 4
+push local 1
+add
+pop local 2
+push local 5
+push local 0
+add
+pop local 3
+push local 2
+push constant 0
+lt
+push local 2
+push static 0
+push constant 1
+sub
+gt
+or
+not
+if-goto IF_FALSE12
+push constant 0
+not
+return
+goto IF_END13
+label IF_FALSE12
+label IF_END13
+push local 3
+push static 1
+push constant 1
+sub
+gt
+not
+if-goto IF_FALSE14
+push constant 0
+not
+return
+goto IF_END15
+label IF_FALSE14
+label IF_END15
+push local 3
+push constant 1
+neg
+gt
+not
+if-goto IF_FALSE16
+push pointer 0
+push local 2
+push local 3
+call Board.isCellFilled 3
+not
+if-goto IF_FALSE18
+push constant 0
+not
+return
+goto IF_END19
+label IF_FALSE18
+label IF_END19
+goto IF_END17
+label IF_FALSE16
+label IF_END17
+goto IF_END11
+label IF_FALSE10
+label IF_END11
+push local 1
+push constant 1
+add
+pop local 1
+goto WHILE_EXP8
+label WHILE_END9
+push local 0
+push constant 1
+add
+pop local 0
+goto WHILE_EXP6
+label WHILE_END7
+push constant 0
+return
+function Board.lockPiece 6
+push argument 0
+pop pointer 0
+push argument 1
+call Tetromino.getX 1
+pop local 4
+push argument 1
+call Tetromino.getY 1
+pop local 5
+push constant 0
+pop local 0
+label WHILE_EXP20
+push local 0
+push constant 4
+lt
+not
+if-goto WHILE_END21
+push constant 0
+pop local 1
+label WHILE_EXP22
+push local 1
+push constant 4
+lt
+not
+if-goto WHILE_END23
+push argument 1
+push local 0
+push local 1
+call Tetromino.getCell 3
+not
+if-goto IF_FALSE24
+push local 4
+push local 1
+add
+pop local 2
+push local 5
+push local 0
+add
+pop local 3
+push local 3
+push constant 1
+neg
+gt
+push local 3
+push static 1
+lt
+and
+not
+if-goto IF_FALSE26
+push pointer 0
+push local 2
+push local 3
+call Board.setCell 3
+pop temp 0
+goto IF_END27
+label IF_FALSE26
+label IF_END27
+goto IF_END25
+label IF_FALSE24
+label IF_END25
+push local 1
+push constant 1
+add
+pop local 1
+goto WHILE_EXP22
+label WHILE_END23
+push local 0
+push constant 1
+add
+pop local 0
+goto WHILE_EXP20
+label WHILE_END21
+push constant 0
+return
+function Board.clearLines 5
+push argument 0
+pop pointer 0
+push constant 0
+pop local 2
+push static 1
+push constant 1
+sub
+pop local 0
+label WHILE_EXP28
+push local 0
+push constant 1
+neg
+gt
+not
+if-goto WHILE_END29
+push constant 0
+not
+pop local 4
+push constant 0
+pop local 1
+label WHILE_EXP30
+push local 1
+push static 0
+lt
+not
+if-goto WHILE_END31
+push pointer 0
+push local 1
+push local 0
+call Board.isCellFilled 3
+not
+not
+if-goto IF_FALSE32
+push constant 0
+pop local 4
+goto IF_END33
+label IF_FALSE32
+label IF_END33
+push local 1
+push constant 1
+add
+pop local 1
+goto WHILE_EXP30
+label WHILE_END31
+push local 4
+not
+if-goto IF_FALSE34
+push local 2
+push constant 1
+add
+pop local 2
+push local 0
+pop local 3
+label WHILE_EXP36
+push local 3
+push constant 0
+gt
+not
+if-goto WHILE_END37
+push constant 0
+pop local 1
+label WHILE_EXP38
+push local 1
+push static 0
+lt
+not
+if-goto WHILE_END39
+push this 0
+push local 3
+push static 0
+call Math.multiply 2
+push local 1
+add
+add
+push this 0
+push local 3
+push constant 1
+sub
+push static 0
+call Math.multiply 2
+push local 1
+add
+add
+pop pointer 1
+push that 0
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push local 1
+push constant 1
+add
+pop local 1
+goto WHILE_EXP38
+label WHILE_END39
+push local 3
+push constant 1
+sub
+pop local 3
+goto WHILE_EXP36
+label WHILE_END37
+push constant 0
+pop local 1
+label WHILE_EXP40
+push local 1
+push static 0
+lt
+not
+if-goto WHILE_END41
+push this 0
+push local 1
+add
+push constant 0
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push local 1
+push constant 1
+add
+pop local 1
+goto WHILE_EXP40
+label WHILE_END41
+goto IF_END35
+label IF_FALSE34
+push local 0
+push constant 1
+sub
+pop local 0
+label IF_END35
+goto WHILE_EXP28
+label WHILE_END29
+push local 2
+return
+function Board.draw 4
+push argument 0
+pop pointer 0
+push constant 0
+not
+call Screen.setColor 1
+pop temp 0
+push static 3
+push constant 2
+sub
+push static 4
+push constant 2
+sub
+push static 3
+push static 0
+push static 2
+call Math.multiply 2
+add
+push constant 1
+add
+push static 4
+push static 1
+push static 2
+call Math.multiply 2
+add
+push constant 1
+add
+call Screen.drawRectangle 4
+pop temp 0
+push constant 0
+call Screen.setColor 1
+pop temp 0
+push static 3
+push static 4
+push static 3
+push static 0
+push static 2
+call Math.multiply 2
+add
+push constant 1
+sub
+push static 4
+push static 1
+push static 2
+call Math.multiply 2
+add
+push constant 1
+sub
+call Screen.drawRectangle 4
+pop temp 0
+push constant 0
+not
+call Screen.setColor 1
+pop temp 0
+push constant 0
+pop local 0
+label WHILE_EXP42
+push local 0
+push static 1
+lt
+not
+if-goto WHILE_END43
+push constant 0
+pop local 1
+label WHILE_EXP44
+push local 1
+push static 0
+lt
+not
+if-goto WHILE_END45
+push pointer 0
+push local 1
+push local 0
+call Board.isCellFilled 3
+not
+if-goto IF_FALSE46
+push static 3
+push local 1
+push static 2
+call Math.multiply 2
+add
+pop local 2
+push static 4
+push local 0
+push static 2
+call Math.multiply 2
+add
+pop local 3
+push local 2
+push constant 1
+add
+push local 3
+push constant 1
+add
+push local 2
+push static 2
+add
+push constant 2
+sub
+push local 3
+push static 2
+add
+push constant 2
+sub
+call Screen.drawRectangle 4
+pop temp 0
+goto IF_END47
+label IF_FALSE46
+label IF_END47
+push local 1
+push constant 1
+add
+pop local 1
+goto WHILE_EXP44
+label WHILE_END45
+push local 0
+push constant 1
+add
+pop local 0
+goto WHILE_EXP42
+label WHILE_END43
+push constant 0
+return
+function Board.drawPiece 8
+push argument 0
+pop pointer 0
+push argument 1
+call Tetromino.getX 1
+pop local 6
+push argument 1
+call Tetromino.getY 1
+pop local 7
+push constant 0
+not
+call Screen.setColor 1
+pop temp 0
+push constant 0
+pop local 0
+label WHILE_EXP48
+push local 0
+push constant 4
+lt
+not
+if-goto WHILE_END49
+push constant 0
+pop local 1
+label WHILE_EXP50
+push local 1
+push constant 4
+lt
+not
+if-goto WHILE_END51
+push argument 1
+push local 0
+push local 1
+call Tetromino.getCell 3
+not
+if-goto IF_FALSE52
+push local 6
+push local 1
+add
+pop local 4
+push local 7
+push local 0
+add
+pop local 5
+push local 4
+push constant 1
+neg
+gt
+push local 4
+push static 0
+lt
+and
+push local 5
+push constant 1
+neg
+gt
+and
+push local 5
+push static 1
+lt
+and
+not
+if-goto IF_FALSE54
+push static 3
+push local 4
+push static 2
+call Math.multiply 2
+add
+pop local 2
+push static 4
+push local 5
+push static 2
+call Math.multiply 2
+add
+pop local 3
+push local 2
+push constant 1
+add
+push local 3
+push constant 1
+add
+push local 2
+push static 2
+add
+push constant 2
+sub
+push local 3
+push static 2
+add
+push constant 2
+sub
+call Screen.drawRectangle 4
+pop temp 0
+goto IF_END55
+label IF_FALSE54
+label IF_END55
+goto IF_END53
+label IF_FALSE52
+label IF_END53
+push local 1
+push constant 1
+add
+pop local 1
+goto WHILE_EXP50
+label WHILE_END51
+push local 0
+push constant 1
+add
+pop local 0
+goto WHILE_EXP48
+label WHILE_END49
+push constant 0
+return
+function Board.erasePiece 8
+push argument 0
+pop pointer 0
+push argument 1
+call Tetromino.getX 1
+pop local 6
+push argument 1
+call Tetromino.getY 1
+pop local 7
+push constant 0
+call Screen.setColor 1
+pop temp 0
+push constant 0
+pop local 0
+label WHILE_EXP56
+push local 0
+push constant 4
+lt
+not
+if-goto WHILE_END57
+push constant 0
+pop local 1
+label WHILE_EXP58
+push local 1
+push constant 4
+lt
+not
+if-goto WHILE_END59
+push argument 1
+push local 0
+push local 1
+call Tetromino.getCell 3
+not
+if-goto IF_FALSE60
+push local 6
+push local 1
+add
+pop local 4
+push local 7
+push local 0
+add
+pop local 5
+push local 4
+push constant 1
+neg
+gt
+push local 4
+push static 0
+lt
+and
+push local 5
+push constant 1
+neg
+gt
+and
+push local 5
+push static 1
+lt
+and
+not
+if-goto IF_FALSE62
+push static 3
+push local 4
+push static 2
+call Math.multiply 2
+add
+pop local 2
+push static 4
+push local 5
+push static 2
+call Math.multiply 2
+add
+pop local 3
+push local 2
+push constant 1
+add
+push local 3
+push constant 1
+add
+push local 2
+push static 2
+add
+push constant 2
+sub
+push local 3
+push static 2
+add
+push constant 2
+sub
+call Screen.drawRectangle 4
+pop temp 0
+goto IF_END63
+label IF_FALSE62
+label IF_END63
+goto IF_END61
+label IF_FALSE60
+label IF_END61
+push local 1
+push constant 1
+add
+pop local 1
+goto WHILE_EXP58
+label WHILE_END59
+push local 0
+push constant 1
+add
+pop local 0
+goto WHILE_EXP56
+label WHILE_END57
+push constant 0
+return
+function Board.drawNextPiece 6
+push argument 0
+pop pointer 0
+push constant 200
+pop local 4
+push constant 100
+pop local 5
+push constant 0
+call Screen.setColor 1
+pop temp 0
+push local 4
+push local 5
+push local 4
+push constant 50
+add
+push local 5
+push constant 50
+add
+call Screen.drawRectangle 4
+pop temp 0
+push constant 0
+not
+call Screen.setColor 1
+pop temp 0
+push constant 0
+pop local 0
+label WHILE_EXP64
+push local 0
+push constant 4
+lt
+not
+if-goto WHILE_END65
+push constant 0
+pop local 1
+label WHILE_EXP66
+push local 1
+push constant 4
+lt
+not
+if-goto WHILE_END67
+push argument 1
+push local 0
+push local 1
+call Tetromino.getCell 3
+not
+if-goto IF_FALSE68
+push local 4
+push local 1
+push constant 10
+call Math.multiply 2
+add
+pop local 2
+push local 5
+push local 0
+push constant 10
+call Math.multiply 2
+add
+pop local 3
+push local 2
+push constant 1
+add
+push local 3
+push constant 1
+add
+push local 2
+push constant 8
+add
+push local 3
+push constant 8
+add
+call Screen.drawRectangle 4
+pop temp 0
+goto IF_END69
+label IF_FALSE68
+label IF_END69
+push local 1
+push constant 1
+add
+pop local 1
+goto WHILE_EXP66
+label WHILE_END67
+push local 0
+push constant 1
+add
+pop local 0
+goto WHILE_EXP64
+label WHILE_END65
+push constant 0
+return
+function Board.isGameOver 1
+push argument 0
+pop pointer 0
+push constant 0
+pop local 0
+label WHILE_EXP70
+push local 0
+push static 0
+lt
+not
+if-goto WHILE_END71
+push pointer 0
+push local 0
+push constant 0
+call Board.isCellFilled 3
+not
+if-goto IF_FALSE72
+push constant 0
+not
+return
+goto IF_END73
+label IF_FALSE72
+label IF_END73
+push local 0
+push constant 1
+add
+pop local 0
+goto WHILE_EXP70
+label WHILE_END71
+push constant 0
+return

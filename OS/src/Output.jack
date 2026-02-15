@@ -1,0 +1,494 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Output.jack
+
+/**
+ * テキスト出力を行うライブラリ
+ *
+ * 画面仕様:
+ *   512 x 256 ピクセル
+ *   文字サイズ: 8 x 11 ピクセル
+ *   テキスト領域: 64 列 x 23 行
+ */
+class Output {
+    static Array charMaps;      // 文字のビットマップデータ
+    static int cursorRow;       // 現在のカーソル行（0-22）
+    static int cursorCol;       // 現在のカーソル列（0-63）
+
+    /** Outputライブラリを初期化する */
+    function void init() {
+        let cursorRow = 0;
+        let cursorCol = 0;
+
+        // 文字マップを初期化
+        do Output.initMap();
+
+        return;
+    }
+
+    /** 文字のビットマップデータを初期化する */
+    function void initMap() {
+        var int i;
+
+        // 127文字分の領域を確保（各文字は11行）
+        let charMaps = Array.new(1397);  // 127 * 11
+
+        // すべてを0で初期化
+        let i = 0;
+        while (i < 1397) {
+            let charMaps[i] = 0;
+            let i = i + 1;
+        }
+
+        // 各文字のビットマップを設定
+        // 文字は8x11ピクセル（横8ビット、縦11行）
+
+        // スペース (32)
+        do Output.create(32,0,0,0,0,0,0,0,0,0,0,0);
+
+        // ! (33)
+        do Output.create(33,12,30,30,30,12,12,0,12,12,0,0);
+
+        // " (34)
+        do Output.create(34,54,54,20,0,0,0,0,0,0,0,0);
+
+        // # (35)
+        do Output.create(35,0,18,18,63,18,18,63,18,18,0,0);
+
+        // $ (36)
+        do Output.create(36,12,30,51,3,30,48,51,30,12,12,0);
+
+        // % (37)
+        do Output.create(37,0,0,35,51,24,12,6,51,49,0,0);
+
+        // & (38)
+        do Output.create(38,12,30,30,12,54,27,27,27,54,0,0);
+
+        // ' (39)
+        do Output.create(39,12,12,6,0,0,0,0,0,0,0,0);
+
+        // ( (40)
+        do Output.create(40,24,12,6,6,6,6,6,12,24,0,0);
+
+        // ) (41)
+        do Output.create(41,6,12,24,24,24,24,24,12,6,0,0);
+
+        // * (42)
+        do Output.create(42,0,0,0,51,30,63,30,51,0,0,0);
+
+        // + (43)
+        do Output.create(43,0,0,0,12,12,63,12,12,0,0,0);
+
+        // , (44)
+        do Output.create(44,0,0,0,0,0,0,0,12,12,6,0);
+
+        // - (45)
+        do Output.create(45,0,0,0,0,0,63,0,0,0,0,0);
+
+        // . (46)
+        do Output.create(46,0,0,0,0,0,0,0,12,12,0,0);
+
+        // / (47)
+        do Output.create(47,0,0,32,48,24,12,6,3,1,0,0);
+
+        // 0 (48)
+        do Output.create(48,12,30,51,51,51,51,51,30,12,0,0);
+
+        // 1 (49)
+        do Output.create(49,12,14,15,12,12,12,12,12,63,0,0);
+
+        // 2 (50)
+        do Output.create(50,30,51,48,24,12,6,3,51,63,0,0);
+
+        // 3 (51)
+        do Output.create(51,30,51,48,48,28,48,48,51,30,0,0);
+
+        // 4 (52)
+        do Output.create(52,16,24,28,26,25,63,24,24,60,0,0);
+
+        // 5 (53)
+        do Output.create(53,63,3,3,31,48,48,48,51,30,0,0);
+
+        // 6 (54)
+        do Output.create(54,28,6,3,3,31,51,51,51,30,0,0);
+
+        // 7 (55)
+        do Output.create(55,63,49,48,48,24,12,12,12,12,0,0);
+
+        // 8 (56)
+        do Output.create(56,30,51,51,51,30,51,51,51,30,0,0);
+
+        // 9 (57)
+        do Output.create(57,30,51,51,51,62,48,48,24,14,0,0);
+
+        // : (58)
+        do Output.create(58,0,0,12,12,0,0,12,12,0,0,0);
+
+        // ; (59)
+        do Output.create(59,0,0,12,12,0,0,12,12,6,0,0);
+
+        // < (60)
+        do Output.create(60,0,0,24,12,6,3,6,12,24,0,0);
+
+        // = (61)
+        do Output.create(61,0,0,0,63,0,0,63,0,0,0,0);
+
+        // > (62)
+        do Output.create(62,0,0,3,6,12,24,12,6,3,0,0);
+
+        // ? (63)
+        do Output.create(63,30,51,51,24,12,12,0,12,12,0,0);
+
+        // @ (64)
+        do Output.create(64,30,51,51,59,59,59,27,3,30,0,0);
+
+        // A (65)
+        do Output.create(65,12,30,51,51,63,51,51,51,51,0,0);
+
+        // B (66)
+        do Output.create(66,31,51,51,51,31,51,51,51,31,0,0);
+
+        // C (67)
+        do Output.create(67,28,54,35,3,3,3,35,54,28,0,0);
+
+        // D (68)
+        do Output.create(68,15,27,51,51,51,51,51,27,15,0,0);
+
+        // E (69)
+        do Output.create(69,63,51,35,11,15,11,35,51,63,0,0);
+
+        // F (70)
+        do Output.create(70,63,51,35,11,15,11,3,3,3,0,0);
+
+        // G (71)
+        do Output.create(71,28,54,35,3,59,51,51,54,44,0,0);
+
+        // H (72)
+        do Output.create(72,51,51,51,51,63,51,51,51,51,0,0);
+
+        // I (73)
+        do Output.create(73,30,12,12,12,12,12,12,12,30,0,0);
+
+        // J (74)
+        do Output.create(74,60,24,24,24,24,24,27,27,14,0,0);
+
+        // K (75)
+        do Output.create(75,51,51,51,27,15,27,51,51,51,0,0);
+
+        // L (76)
+        do Output.create(76,3,3,3,3,3,3,35,51,63,0,0);
+
+        // M (77)
+        do Output.create(77,33,51,63,63,51,51,51,51,51,0,0);
+
+        // N (78)
+        do Output.create(78,51,51,55,55,63,59,59,51,51,0,0);
+
+        // O (79)
+        do Output.create(79,30,51,51,51,51,51,51,51,30,0,0);
+
+        // P (80)
+        do Output.create(80,31,51,51,51,31,3,3,3,3,0,0);
+
+        // Q (81)
+        do Output.create(81,30,51,51,51,51,51,63,59,30,48,0);
+
+        // R (82)
+        do Output.create(82,31,51,51,51,31,27,51,51,51,0,0);
+
+        // S (83)
+        do Output.create(83,30,51,51,6,28,48,51,51,30,0,0);
+
+        // T (84)
+        do Output.create(84,63,63,45,12,12,12,12,12,30,0,0);
+
+        // U (85)
+        do Output.create(85,51,51,51,51,51,51,51,51,30,0,0);
+
+        // V (86)
+        do Output.create(86,51,51,51,51,51,30,30,12,12,0,0);
+
+        // W (87)
+        do Output.create(87,51,51,51,51,51,63,63,51,33,0,0);
+
+        // X (88)
+        do Output.create(88,51,51,30,30,12,30,30,51,51,0,0);
+
+        // Y (89)
+        do Output.create(89,51,51,51,51,30,12,12,12,30,0,0);
+
+        // Z (90)
+        do Output.create(90,63,51,49,24,12,6,35,51,63,0,0);
+
+        // [ (91)
+        do Output.create(91,30,6,6,6,6,6,6,6,30,0,0);
+
+        // \ (92)
+        do Output.create(92,0,0,1,3,6,12,24,48,32,0,0);
+
+        // ] (93)
+        do Output.create(93,30,24,24,24,24,24,24,24,30,0,0);
+
+        // ^ (94)
+        do Output.create(94,8,28,54,0,0,0,0,0,0,0,0);
+
+        // _ (95)
+        do Output.create(95,0,0,0,0,0,0,0,0,0,63,0);
+
+        // ` (96)
+        do Output.create(96,6,12,24,0,0,0,0,0,0,0,0);
+
+        // a (97)
+        do Output.create(97,0,0,0,14,24,30,27,27,54,0,0);
+
+        // b (98)
+        do Output.create(98,3,3,3,15,27,51,51,51,30,0,0);
+
+        // c (99)
+        do Output.create(99,0,0,0,30,51,3,3,51,30,0,0);
+
+        // d (100)
+        do Output.create(100,48,48,48,60,54,51,51,51,30,0,0);
+
+        // e (101)
+        do Output.create(101,0,0,0,30,51,63,3,51,30,0,0);
+
+        // f (102)
+        do Output.create(102,28,54,38,6,15,6,6,6,15,0,0);
+
+        // g (103)
+        do Output.create(103,0,0,30,51,51,51,62,48,51,30,0);
+
+        // h (104)
+        do Output.create(104,3,3,3,27,55,51,51,51,51,0,0);
+
+        // i (105)
+        do Output.create(105,12,12,0,14,12,12,12,12,30,0,0);
+
+        // j (106)
+        do Output.create(106,48,48,0,56,48,48,48,48,51,30,0);
+
+        // k (107)
+        do Output.create(107,3,3,3,51,27,15,15,27,51,0,0);
+
+        // l (108)
+        do Output.create(108,14,12,12,12,12,12,12,12,30,0,0);
+
+        // m (109)
+        do Output.create(109,0,0,0,29,63,43,43,43,43,0,0);
+
+        // n (110)
+        do Output.create(110,0,0,0,29,51,51,51,51,51,0,0);
+
+        // o (111)
+        do Output.create(111,0,0,0,30,51,51,51,51,30,0,0);
+
+        // p (112)
+        do Output.create(112,0,0,0,30,51,51,51,31,3,3,0);
+
+        // q (113)
+        do Output.create(113,0,0,0,30,51,51,51,62,48,48,0);
+
+        // r (114)
+        do Output.create(114,0,0,0,29,55,51,3,3,7,0,0);
+
+        // s (115)
+        do Output.create(115,0,0,0,30,51,6,24,51,30,0,0);
+
+        // t (116)
+        do Output.create(116,4,6,6,15,6,6,6,54,28,0,0);
+
+        // u (117)
+        do Output.create(117,0,0,0,27,27,27,27,27,54,0,0);
+
+        // v (118)
+        do Output.create(118,0,0,0,51,51,51,51,30,12,0,0);
+
+        // w (119)
+        do Output.create(119,0,0,0,51,51,51,63,63,18,0,0);
+
+        // x (120)
+        do Output.create(120,0,0,0,51,30,12,12,30,51,0,0);
+
+        // y (121)
+        do Output.create(121,0,0,0,51,51,51,62,48,24,15,0);
+
+        // z (122)
+        do Output.create(122,0,0,0,63,27,12,6,51,63,0,0);
+
+        // { (123)
+        do Output.create(123,56,12,12,12,7,12,12,12,56,0,0);
+
+        // | (124)
+        do Output.create(124,12,12,12,12,12,12,12,12,12,0,0);
+
+        // } (125)
+        do Output.create(125,7,12,12,12,56,12,12,12,7,0,0);
+
+        // ~ (126)
+        do Output.create(126,38,45,25,0,0,0,0,0,0,0,0);
+
+        return;
+    }
+
+    /** 文字のビットマップを設定する（内部関数） */
+    function void create(int c, int a, int b, int d, int e,
+                         int f, int g, int h, int i, int j, int k, int l) {
+        var int baseIndex;
+
+        let baseIndex = Math.multiply(c, 11);
+        let charMaps[baseIndex] = a;
+        let charMaps[baseIndex + 1] = b;
+        let charMaps[baseIndex + 2] = d;
+        let charMaps[baseIndex + 3] = e;
+        let charMaps[baseIndex + 4] = f;
+        let charMaps[baseIndex + 5] = g;
+        let charMaps[baseIndex + 6] = h;
+        let charMaps[baseIndex + 7] = i;
+        let charMaps[baseIndex + 8] = j;
+        let charMaps[baseIndex + 9] = k;
+        let charMaps[baseIndex + 10] = l;
+
+        return;
+    }
+
+    /**
+     * カーソルを指定位置に移動する
+     * 行: 0-22, 列: 0-63
+     */
+    function void moveCursor(int row, int col) {
+        if ((row < 0) | (row > 22) | (col < 0) | (col > 63)) {
+            do Sys.error(20);  // カーソル位置が範囲外
+            return;
+        }
+
+        let cursorRow = row;
+        let cursorCol = col;
+        return;
+    }
+
+    /** 現在のカーソル位置に文字を出力する */
+    function void printChar(char c) {
+        var int baseIndex, row, bit, pixelRow, pixelCol;
+        var int addr, mask, value;
+
+        // 改行文字の処理
+        if (c = 128) {
+            do Output.println();
+            return;
+        }
+
+        // バックスペース文字の処理
+        if (c = 129) {
+            do Output.backSpace();
+            return;
+        }
+
+        // 範囲チェック（印刷可能文字: 32-126）
+        if ((c < 32) | (c > 126)) {
+            let c = 32;  // 範囲外は空白として扱う
+        }
+
+        // 文字のビットマップを画面に描画
+        let baseIndex = Math.multiply(c, 11);
+        let pixelCol = Math.multiply(cursorCol, 8);
+        let pixelRow = Math.multiply(cursorRow, 11);
+
+        let row = 0;
+        while (row < 11) {
+            // この行のビットマップパターンを取得
+            let value = charMaps[baseIndex + row];
+
+            // 8ビット分を描画
+            let bit = 0;
+            while (bit < 8) {
+                if (~((value & Math.twoToThe(bit)) = 0)) {
+                    do Screen.setColor(true);
+                } else {
+                    do Screen.setColor(false);
+                }
+                do Screen.drawPixel(pixelCol + bit, pixelRow + row);
+                let bit = bit + 1;
+            }
+
+            let row = row + 1;
+        }
+
+        // カーソルを次の位置に移動
+        let cursorCol = cursorCol + 1;
+        if (cursorCol > 63) {
+            do Output.println();
+        }
+
+        return;
+    }
+
+    /** 文字列を出力する */
+    function void printString(String s) {
+        var int i, len;
+
+        let len = s.length();
+        let i = 0;
+
+        while (i < len) {
+            do Output.printChar(s.charAt(i));
+            let i = i + 1;
+        }
+
+        return;
+    }
+
+    /** 整数を出力する */
+    function void printInt(int n) {
+        var String s;
+
+        let s = String.new(6);  // -32768 は6文字
+        do s.setInt(n);
+        do Output.printString(s);
+        do s.dispose();
+
+        return;
+    }
+
+    /** 改行を出力する */
+    function void println() {
+        let cursorCol = 0;
+        let cursorRow = cursorRow + 1;
+
+        // 画面下端に達したらスクロール（簡易版：先頭に戻る）
+        if (cursorRow > 22) {
+            let cursorRow = 0;
+        }
+
+        return;
+    }
+
+    /** バックスペース処理 */
+    function void backSpace() {
+        // カーソルを1つ戻す
+        if (cursorCol > 0) {
+            let cursorCol = cursorCol - 1;
+        } else {
+            if (cursorRow > 0) {
+                let cursorRow = cursorRow - 1;
+                let cursorCol = 63;
+            }
+        }
+
+        // 現在位置をスペースで上書き
+        do Output.printChar(32);
+
+        // カーソルを戻す
+        if (cursorCol > 0) {
+            let cursorCol = cursorCol - 1;
+        } else {
+            if (cursorRow > 0) {
+                let cursorRow = cursorRow - 1;
+                let cursorCol = 63;
+            }
+        }
+
+        return;
+    }
+}

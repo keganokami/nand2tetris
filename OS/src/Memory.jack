@@ -1,0 +1,131 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Memory.jack
+
+/**
+ * メモリ操作を提供するライブラリ
+ *
+ * Hackコンピューターのメモリマップ:
+ *   RAM[0-15]:     特殊レジスタ
+ *   RAM[16-255]:   静的変数
+ *   RAM[256-2047]: スタック
+ *   RAM[2048-16383]: ヒープ（このクラスで管理）
+ *   RAM[16384-24575]: スクリーンメモリマップ
+ *   RAM[24576]:    キーボードメモリマップ
+ *
+ * ヒープ管理にはフリーリストアルゴリズムを使用
+ * 各フリーブロックは [サイズ, 次のブロックへのポインタ, ...空き領域...] の形式
+ */
+class Memory {
+    // ヒープの開始・終了アドレス
+    static int heapBase;
+    static int heapEnd;
+
+    // フリーリストの先頭
+    static Array freeList;
+
+    /** Memoryライブラリを初期化する */
+    function void init() {
+        let heapBase = 2048;
+        let heapEnd = 16383;
+
+        // フリーリストを初期化（ヒープ全体を1つのフリーブロックとして）
+        let freeList = heapBase;
+        let freeList[0] = heapEnd - heapBase + 1;  // サイズ
+        let freeList[1] = null;                     // 次のブロック（なし）
+
+        return;
+    }
+
+    /** 指定アドレスのメモリ値を返す */
+    function int peek(int address) {
+        var Array memory;
+        let memory = 0;
+        return memory[address];
+    }
+
+    /** 指定アドレスにvalue値を書き込む */
+    function void poke(int address, int value) {
+        var Array memory;
+        let memory = 0;
+        let memory[address] = value;
+        return;
+    }
+
+    /**
+     * 指定サイズのメモリブロックを確保して返す
+     * First-fit アルゴリズムを使用
+     *
+     * フリーブロックの構造:
+     *   [0]: ブロックサイズ
+     *   [1]: 次のフリーブロックへのポインタ（またはnull）
+     *   [2...]: 実際の空き領域
+     *
+     * 確保されたブロックの構造:
+     *   [0]: ブロックサイズ
+     *   [1...]: ユーザーに返される領域
+     */
+    function int alloc(int size) {
+        var Array prev, curr, block;
+        var int totalSize;
+
+        if (size < 1) {
+            do Sys.error(5);  // 確保サイズが不正
+            return null;
+        }
+
+        // 必要な総サイズ（サイズヘッダ + ユーザー領域）
+        let totalSize = size + 1;
+
+        // フリーリストからFirst-fitで探索
+        let prev = null;
+        let curr = freeList;
+
+        while (~(curr = null)) {
+            // 十分なサイズのブロックが見つかった
+            if (curr[0] > totalSize) {
+                // ブロックを分割
+                let block = curr + curr[0] - totalSize;
+                let block[0] = totalSize;
+                let curr[0] = curr[0] - totalSize;
+                return block + 1;  // サイズヘッダの次のアドレスを返す
+            }
+
+            // ちょうどのサイズ（または少し大きい）の場合はブロック全体を使用
+            if ((curr[0] > size) | (curr[0] = totalSize)) {
+                // フリーリストからこのブロックを削除
+                if (prev = null) {
+                    let freeList = curr[1];
+                } else {
+                    let prev[1] = curr[1];
+                }
+                return curr + 1;
+            }
+
+            let prev = curr;
+            let curr = curr[1];
+        }
+
+        // メモリ不足
+        do Sys.error(6);
+        return null;
+    }
+
+    /**
+     * 以前にallocで確保したオブジェクト/配列を解放する
+     * 解放されたブロックはフリーリストの先頭に追加
+     */
+    function void deAlloc(Array obj) {
+        var Array block;
+
+        // objはユーザー領域の先頭なので、サイズヘッダは1つ前
+        let block = obj - 1;
+
+        // フリーリストの先頭に追加
+        let block[1] = freeList;
+        let freeList = block;
+
+        return;
+    }
+}

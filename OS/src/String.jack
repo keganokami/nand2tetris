@@ -1,0 +1,213 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/String.jack
+
+/**
+ * 文字列型を表すクラス
+ * 文字列は可変長で、最大長まで文字を追加できる
+ */
+class String {
+    field Array chars;      // 文字を格納する配列
+    field int length;       // 現在の文字列長
+    field int maxLength;    // 最大文字列長
+
+    /**
+     * 指定された最大長で新しい空の文字列を生成する
+     * maxLength >= 0
+     */
+    constructor String new(int maxLen) {
+        if (maxLen < 0) {
+            do Sys.error(14);  // 最大長が不正
+            return this;
+        }
+
+        let maxLength = maxLen;
+        let length = 0;
+
+        if (maxLen > 0) {
+            let chars = Array.new(maxLen);
+        } else {
+            let chars = null;
+        }
+
+        return this;
+    }
+
+    /** この文字列を解放する */
+    method void dispose() {
+        if (~(chars = null)) {
+            do chars.dispose();
+        }
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /** 文字列の現在の長さを返す */
+    method int length() {
+        return length;
+    }
+
+    /**
+     * 文字列のindex番目の文字を返す
+     * index は 0 から length-1 の範囲
+     */
+    method char charAt(int index) {
+        if ((index < 0) | (index > (length - 1))) {
+            do Sys.error(15);  // インデックスが範囲外
+            return 0;
+        }
+        return chars[index];
+    }
+
+    /**
+     * 文字列のindex番目の文字をcに設定する
+     * index は 0 から length-1 の範囲
+     */
+    method void setCharAt(int index, char c) {
+        if ((index < 0) | (index > (length - 1))) {
+            do Sys.error(16);  // インデックスが範囲外
+            return;
+        }
+        let chars[index] = c;
+        return;
+    }
+
+    /**
+     * 文字cを文字列の末尾に追加し、この文字列を返す
+     * 現在の長さが最大長未満である必要がある
+     */
+    method String appendChar(char c) {
+        if (length = maxLength) {
+            do Sys.error(17);  // 文字列が満杯
+            return this;
+        }
+        let chars[length] = c;
+        let length = length + 1;
+        return this;
+    }
+
+    /** 文字列の最後の文字を削除し、その文字を返す */
+    method char eraseLastChar() {
+        var char lastChar;
+
+        if (length = 0) {
+            do Sys.error(18);  // 文字列が空
+            return 0;
+        }
+
+        let length = length - 1;
+        let lastChar = chars[length];
+        return lastChar;
+    }
+
+    /**
+     * 文字列が表す整数値を返す
+     * 文字列が数字で始まる場合、その数値を解析する
+     * 先頭にマイナス記号があれば負の数として解釈
+     */
+    method int intValue() {
+        var int val, i;
+        var boolean neg;
+
+        let val = 0;
+        let i = 0;
+        let neg = false;
+
+        // 先頭のマイナス記号をチェック
+        if ((length > 0) & (chars[0] = 45)) {  // 45 = '-'
+            let neg = true;
+            let i = 1;
+        }
+
+        // 数字を解析
+        while (i < length) {
+            if ((chars[i] > 47) & (chars[i] < 58)) {  // '0'-'9'
+                let val = Math.multiply(val, 10) + (chars[i] - 48);
+            } else {
+                // 数字以外の文字が見つかったら終了
+                if (neg) {
+                    return -val;
+                }
+                return val;
+            }
+            let i = i + 1;
+        }
+
+        if (neg) {
+            return -val;
+        }
+        return val;
+    }
+
+    /**
+     * この文字列の内容を指定された整数の10進数表現に設定する
+     * 既存の内容は上書きされる
+     */
+    method void setInt(int val) {
+        var int absVal, digit, numDigits;
+        var boolean neg;
+        var Array temp;
+
+        // 文字列をクリア
+        let length = 0;
+
+        // 符号を処理
+        let neg = val < 0;
+        let absVal = Math.abs(val);
+
+        // 一時配列に桁を逆順で格納（最大6桁: -32768）
+        let temp = Array.new(6);
+        let numDigits = 0;
+
+        // 0 の特別処理
+        if (absVal = 0) {
+            do appendChar(48);  // '0'
+            do temp.dispose();
+            return;
+        }
+
+        // 各桁を抽出
+        while (absVal > 0) {
+            let digit = absVal - Math.multiply(Math.divide(absVal, 10), 10);
+            let temp[numDigits] = digit + 48;  // 数字を文字に変換
+            let numDigits = numDigits + 1;
+            let absVal = Math.divide(absVal, 10);
+        }
+
+        // マイナス記号を追加
+        if (neg) {
+            do appendChar(45);  // '-'
+        }
+
+        // 桁を逆順で文字列に追加
+        while (numDigits > 0) {
+            let numDigits = numDigits - 1;
+            do appendChar(temp[numDigits]);
+        }
+
+        do temp.dispose();
+        return;
+    }
+
+    /**
+     * 改行文字を返す
+     */
+    function char newLine() {
+        return 128;
+    }
+
+    /**
+     * バックスペース文字を返す
+     */
+    function char backSpace() {
+        return 129;
+    }
+
+    /**
+     * ダブルクォート文字を返す
+     */
+    function char doubleQuote() {
+        return 34;
+    }
+}

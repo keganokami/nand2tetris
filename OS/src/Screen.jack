@@ -1,0 +1,327 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Screen.jack
+
+/**
+ * グラフィック画面を描画するライブラリ
+ *
+ * Hack画面仕様:
+ *   解像度: 512 x 256 ピクセル
+ *   メモリマップ: RAM[16384] - RAM[24575]
+ *   各ワード（16ビット）が16ピクセルを表す
+ *   行あたり 512/16 = 32 ワード
+ *   合計 256 * 32 = 8192 ワード
+ */
+class Screen {
+    static int screenBase;      // スクリーンメモリの開始アドレス
+    static boolean currentColor; // 現在の描画色（true=黒, false=白）
+    static Array twoToThe;       // 2のべき乗テーブル
+
+    /** Screenライブラリを初期化する */
+    function void init() {
+        var int i, val;
+
+        let screenBase = 16384;
+        let currentColor = true;  // デフォルトは黒
+
+        // 2のべき乗テーブルを初期化
+        let twoToThe = Array.new(16);
+        let val = 1;
+        let i = 0;
+        while (i < 16) {
+            let twoToThe[i] = val;
+            let val = val + val;
+            let i = i + 1;
+        }
+
+        return;
+    }
+
+    /** 画面全体を消去する（白で塗りつぶす） */
+    function void clearScreen() {
+        var int i;
+        let i = 0;
+
+        while (i < 8192) {
+            do Memory.poke(screenBase + i, 0);
+            let i = i + 1;
+        }
+
+        return;
+    }
+
+    /**
+     * 描画色を設定する
+     * b = true: 黒
+     * b = false: 白
+     */
+    function void setColor(boolean b) {
+        let currentColor = b;
+        return;
+    }
+
+    /**
+     * 座標(x, y)にピクセルを描画する
+     * 0 <= x < 512, 0 <= y < 256
+     */
+    function void drawPixel(int x, int y) {
+        var int address, bit, value;
+
+        // 範囲チェック
+        if ((x < 0) | (x > 511) | (y < 0) | (y > 255)) {
+            do Sys.error(7);  // 座標が範囲外
+            return;
+        }
+
+        // メモリアドレスとビット位置を計算
+        // address = screenBase + (y * 32) + (x / 16)
+        let address = screenBase + Math.multiply(y, 32) + Math.divide(x, 16);
+        let bit = x - Math.multiply(Math.divide(x, 16), 16);  // x % 16
+
+        // 現在のメモリ値を取得
+        let value = Memory.peek(address);
+
+        // ビットを設定または消去
+        if (currentColor) {
+            // 黒: ビットをセット
+            let value = value | twoToThe[bit];
+        } else {
+            // 白: ビットをクリア
+            let value = value & (~twoToThe[bit]);
+        }
+
+        do Memory.poke(address, value);
+        return;
+    }
+
+    /**
+     * (x1, y1) から (x2, y2) へ線を描画する
+     * Bresenhamのアルゴリズムを使用
+     */
+    function void drawLine(int x1, int y1, int x2, int y2) {
+        var int dx, dy, a, b, diff;
+        var int adyMinusbdx;
+        var int stepX, stepY;
+
+        // 範囲チェック
+        if ((x1 < 0) | (x1 > 511) | (y1 < 0) | (y1 > 255) |
+            (x2 < 0) | (x2 > 511) | (y2 < 0) | (y2 > 255)) {
+            do Sys.error(8);  // 座標が範囲外
+            return;
+        }
+
+        let dx = x2 - x1;
+        let dy = y2 - y1;
+
+        // 水平線の高速描画
+        if (dy = 0) {
+            do Screen.drawHorizontalLine(x1, x2, y1);
+            return;
+        }
+
+        // 垂直線の高速描画
+        if (dx = 0) {
+            do Screen.drawVerticalLine(x1, y1, y2);
+            return;
+        }
+
+        // 方向を決定
+        if (dx < 0) {
+            let stepX = -1;
+            let dx = -dx;
+        } else {
+            let stepX = 1;
+        }
+
+        if (dy < 0) {
+            let stepY = -1;
+            let dy = -dy;
+        } else {
+            let stepY = 1;
+        }
+
+        // Bresenhamのアルゴリズム
+        let a = 0;
+        let b = 0;
+        let adyMinusbdx = 0;
+
+        while ((~(a > dx)) & (~(b > dy))) {
+            do Screen.drawPixel(x1 + Math.multiply(a, stepX), y1 + Math.multiply(b, stepY));
+
+            if (adyMinusbdx < 0) {
+                let a = a + 1;
+                let adyMinusbdx = adyMinusbdx + dy;
+            } else {
+                let b = b + 1;
+                let adyMinusbdx = adyMinusbdx - dx;
+            }
+        }
+
+        return;
+    }
+
+    /** 水平線を描画（内部関数、高速版） */
+    function void drawHorizontalLine(int x1, int x2, int y) {
+        var int temp, startAddr, endAddr, startBit, endBit;
+        var int addr, leftMask, rightMask, value;
+
+        // x1 <= x2 を保証
+        if (x1 > x2) {
+            let temp = x1;
+            let x1 = x2;
+            let x2 = temp;
+        }
+
+        // アドレスとビット位置を計算
+        let startAddr = screenBase + Math.multiply(y, 32) + Math.divide(x1, 16);
+        let endAddr = screenBase + Math.multiply(y, 32) + Math.divide(x2, 16);
+        let startBit = x1 - Math.multiply(Math.divide(x1, 16), 16);
+        let endBit = x2 - Math.multiply(Math.divide(x2, 16), 16);
+
+        // 同じワード内の場合
+        if (startAddr = endAddr) {
+            let addr = startAddr;
+            let value = Memory.peek(addr);
+
+            // マスクを作成
+            let leftMask = ~(twoToThe[startBit] - 1);
+            if (endBit = 15) {
+                let rightMask = -1;  // すべて1
+            } else {
+                let rightMask = twoToThe[endBit + 1] - 1;
+            }
+
+            if (currentColor) {
+                let value = value | (leftMask & rightMask);
+            } else {
+                let value = value & (~(leftMask & rightMask));
+            }
+            do Memory.poke(addr, value);
+            return;
+        }
+
+        // 開始ワードの部分描画
+        let value = Memory.peek(startAddr);
+        let leftMask = ~(twoToThe[startBit] - 1);
+        if (currentColor) {
+            let value = value | leftMask;
+        } else {
+            let value = value & (~leftMask);
+        }
+        do Memory.poke(startAddr, value);
+
+        // 中間ワードの完全描画
+        let addr = startAddr + 1;
+        while (addr < endAddr) {
+            if (currentColor) {
+                do Memory.poke(addr, -1);  // すべて黒
+            } else {
+                do Memory.poke(addr, 0);   // すべて白
+            }
+            let addr = addr + 1;
+        }
+
+        // 終了ワードの部分描画
+        let value = Memory.peek(endAddr);
+        if (endBit = 15) {
+            let rightMask = -1;
+        } else {
+            let rightMask = twoToThe[endBit + 1] - 1;
+        }
+        if (currentColor) {
+            let value = value | rightMask;
+        } else {
+            let value = value & (~rightMask);
+        }
+        do Memory.poke(endAddr, value);
+
+        return;
+    }
+
+    /** 垂直線を描画（内部関数） */
+    function void drawVerticalLine(int x, int y1, int y2) {
+        var int temp, y;
+
+        // y1 <= y2 を保証
+        if (y1 > y2) {
+            let temp = y1;
+            let y1 = y2;
+            let y2 = temp;
+        }
+
+        let y = y1;
+        while (~(y > y2)) {
+            do Screen.drawPixel(x, y);
+            let y = y + 1;
+        }
+
+        return;
+    }
+
+    /**
+     * 塗りつぶされた矩形を描画する
+     * 左上(x1, y1)から右下(x2, y2)
+     */
+    function void drawRectangle(int x1, int y1, int x2, int y2) {
+        var int y;
+
+        // 範囲チェック
+        if ((x1 < 0) | (x1 > 511) | (y1 < 0) | (y1 > 255) |
+            (x2 < 0) | (x2 > 511) | (y2 < 0) | (y2 > 255)) {
+            do Sys.error(9);  // 座標が範囲外
+            return;
+        }
+
+        // y1 <= y2 を保証
+        if (y1 > y2) {
+            let y = y1;
+            let y1 = y2;
+            let y2 = y;
+        }
+
+        let y = y1;
+        while (~(y > y2)) {
+            do Screen.drawHorizontalLine(x1, x2, y);
+            let y = y + 1;
+        }
+
+        return;
+    }
+
+    /**
+     * 塗りつぶされた円を描画する
+     * 中心(x, y)、半径r
+     */
+    function void drawCircle(int x, int y, int r) {
+        var int dy, rSquared, sqrtVal;
+
+        // 範囲チェック
+        if ((x < 0) | (x > 511) | (y < 0) | (y > 255)) {
+            do Sys.error(12);  // 中心座標が範囲外
+            return;
+        }
+
+        if (r < 0) {
+            do Sys.error(13);  // 半径が負
+            return;
+        }
+
+        // 半径が大きすぎる場合のチェック
+        if (r > 181) {
+            do Sys.error(13);  // 半径が大きすぎてオーバーフロー
+            return;
+        }
+
+        let rSquared = Math.multiply(r, r);
+        let dy = -r;
+
+        while (~(dy > r)) {
+            let sqrtVal = Math.sqrt(rSquared - Math.multiply(dy, dy));
+            do Screen.drawHorizontalLine(x - sqrtVal, x + sqrtVal, y + dy);
+            let dy = dy + 1;
+        }
+
+        return;
+    }
+}

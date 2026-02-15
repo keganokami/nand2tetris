@@ -1,0 +1,30 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Array.jack
+
+/**
+ * 配列を表すクラス
+ * 配列の要素アクセス (arr[i]) はコンパイラが直接処理するため、
+ * このクラスは生成と解放のみを提供する
+ */
+class Array {
+
+    /**
+     * 指定されたサイズの新しい配列を生成する
+     * size: 配列のサイズ（要素数）
+     */
+    function Array new(int size) {
+        if (size < 1) {
+            do Sys.error(2);  // 配列サイズが不正
+            return null;
+        }
+        return Memory.alloc(size);
+    }
+
+    /** この配列を解放する */
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+}

@@ -1,0 +1,1027 @@
+function Tetromino.new 0
+push constant 5
+call Memory.alloc 1
+pop pointer 0
+push argument 0
+pop this 0
+push constant 0
+pop this 1
+push constant 3
+pop this 2
+push constant 0
+pop this 3
+push constant 16
+call Array.new 1
+pop this 4
+push pointer 0
+call Tetromino.updateShape 1
+pop temp 0
+push pointer 0
+return
+function Tetromino.dispose 0
+push argument 0
+pop pointer 0
+push this 4
+call Array.dispose 1
+pop temp 0
+push pointer 0
+call Memory.deAlloc 1
+pop temp 0
+push constant 0
+return
+function Tetromino.getX 0
+push argument 0
+pop pointer 0
+push this 2
+return
+function Tetromino.getY 0
+push argument 0
+pop pointer 0
+push this 3
+return
+function Tetromino.getType 0
+push argument 0
+pop pointer 0
+push this 0
+return
+function Tetromino.getCell 0
+push argument 0
+pop pointer 0
+push this 4
+push argument 1
+push constant 4
+call Math.multiply 2
+push argument 2
+add
+add
+pop pointer 1
+push that 0
+push constant 1
+eq
+return
+function Tetromino.moveLeft 0
+push argument 0
+pop pointer 0
+push this 2
+push constant 1
+sub
+pop this 2
+push constant 0
+return
+function Tetromino.moveRight 0
+push argument 0
+pop pointer 0
+push this 2
+push constant 1
+add
+pop this 2
+push constant 0
+return
+function Tetromino.moveDown 0
+push argument 0
+pop pointer 0
+push this 3
+push constant 1
+add
+pop this 3
+push constant 0
+return
+function Tetromino.moveUp 0
+push argument 0
+pop pointer 0
+push this 3
+push constant 1
+sub
+pop this 3
+push constant 0
+return
+function Tetromino.setX 0
+push argument 0
+pop pointer 0
+push argument 1
+pop this 2
+push constant 0
+return
+function Tetromino.rotateClockwise 0
+push argument 0
+pop pointer 0
+push this 1
+push constant 1
+add
+pop this 1
+push this 1
+push constant 3
+gt
+not
+if-goto IF_FALSE0
+push constant 0
+pop this 1
+goto IF_END1
+label IF_FALSE0
+label IF_END1
+push pointer 0
+call Tetromino.updateShape 1
+pop temp 0
+push constant 0
+return
+function Tetromino.rotateCounterClockwise 0
+push argument 0
+pop pointer 0
+push this 1
+push constant 1
+sub
+pop this 1
+push this 1
+push constant 0
+lt
+not
+if-goto IF_FALSE2
+push constant 3
+pop this 1
+goto IF_END3
+label IF_FALSE2
+label IF_END3
+push pointer 0
+call Tetromino.updateShape 1
+pop temp 0
+push constant 0
+return
+function Tetromino.updateShape 1
+push argument 0
+pop pointer 0
+push constant 0
+pop local 0
+label WHILE_EXP4
+push local 0
+push constant 16
+lt
+not
+if-goto WHILE_END5
+push this 4
+push local 0
+add
+push constant 0
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push local 0
+push constant 1
+add
+pop local 0
+goto WHILE_EXP4
+label WHILE_END5
+push this 0
+push constant 0
+eq
+not
+if-goto IF_FALSE6
+push pointer 0
+call Tetromino.setShapeI 1
+pop temp 0
+goto IF_END7
+label IF_FALSE6
+label IF_END7
+push this 0
+push constant 1
+eq
+not
+if-goto IF_FALSE8
+push pointer 0
+call Tetromino.setShapeO 1
+pop temp 0
+goto IF_END9
+label IF_FALSE8
+label IF_END9
+push this 0
+push constant 2
+eq
+not
+if-goto IF_FALSE10
+push pointer 0
+call Tetromino.setShapeT 1
+pop temp 0
+goto IF_END11
+label IF_FALSE10
+label IF_END11
+push this 0
+push constant 3
+eq
+not
+if-goto IF_FALSE12
+push pointer 0
+call Tetromino.setShapeS 1
+pop temp 0
+goto IF_END13
+label IF_FALSE12
+label IF_END13
+push this 0
+push constant 4
+eq
+not
+if-goto IF_FALSE14
+push pointer 0
+call Tetromino.setShapeZ 1
+pop temp 0
+goto IF_END15
+label IF_FALSE14
+label IF_END15
+push this 0
+push constant 5
+eq
+not
+if-goto IF_FALSE16
+push pointer 0
+call Tetromino.setShapeJ 1
+pop temp 0
+goto IF_END17
+label IF_FALSE16
+label IF_END17
+push this 0
+push constant 6
+eq
+not
+if-goto IF_FALSE18
+push pointer 0
+call Tetromino.setShapeL 1
+pop temp 0
+goto IF_END19
+label IF_FALSE18
+label IF_END19
+push constant 0
+return
+function Tetromino.setShapeI 0
+push argument 0
+pop pointer 0
+push this 1
+push constant 0
+eq
+push this 1
+push constant 2
+eq
+or
+not
+if-goto IF_FALSE20
+push this 4
+push constant 4
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 5
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 6
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 7
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+goto IF_END21
+label IF_FALSE20
+push this 4
+push constant 1
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 5
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 9
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 13
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+label IF_END21
+push constant 0
+return
+function Tetromino.setShapeO 0
+push argument 0
+pop pointer 0
+push this 4
+push constant 1
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 2
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 5
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 6
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 0
+return
+function Tetromino.setShapeT 0
+push argument 0
+pop pointer 0
+push this 1
+push constant 0
+eq
+not
+if-goto IF_FALSE22
+push this 4
+push constant 1
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 4
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 5
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 6
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+goto IF_END23
+label IF_FALSE22
+label IF_END23
+push this 1
+push constant 1
+eq
+not
+if-goto IF_FALSE24
+push this 4
+push constant 1
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 5
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 6
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 9
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+goto IF_END25
+label IF_FALSE24
+label IF_END25
+push this 1
+push constant 2
+eq
+not
+if-goto IF_FALSE26
+push this 4
+push constant 4
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 5
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 6
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 9
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+goto IF_END27
+label IF_FALSE26
+label IF_END27
+push this 1
+push constant 3
+eq
+not
+if-goto IF_FALSE28
+push this 4
+push constant 1
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 4
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 5
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 9
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+goto IF_END29
+label IF_FALSE28
+label IF_END29
+push constant 0
+return
+function Tetromino.setShapeS 0
+push argument 0
+pop pointer 0
+push this 1
+push constant 0
+eq
+push this 1
+push constant 2
+eq
+or
+not
+if-goto IF_FALSE30
+push this 4
+push constant 1
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 2
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 4
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 5
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+goto IF_END31
+label IF_FALSE30
+push this 4
+push constant 0
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 4
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 5
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 9
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+label IF_END31
+push constant 0
+return
+function Tetromino.setShapeZ 0
+push argument 0
+pop pointer 0
+push this 1
+push constant 0
+eq
+push this 1
+push constant 2
+eq
+or
+not
+if-goto IF_FALSE32
+push this 4
+push constant 0
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 1
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 5
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 6
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+goto IF_END33
+label IF_FALSE32
+push this 4
+push constant 1
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 4
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 5
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 8
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+label IF_END33
+push constant 0
+return
+function Tetromino.setShapeJ 0
+push argument 0
+pop pointer 0
+push this 1
+push constant 0
+eq
+not
+if-goto IF_FALSE34
+push this 4
+push constant 0
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 4
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 5
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 6
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+goto IF_END35
+label IF_FALSE34
+label IF_END35
+push this 1
+push constant 1
+eq
+not
+if-goto IF_FALSE36
+push this 4
+push constant 1
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 2
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 5
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 9
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+goto IF_END37
+label IF_FALSE36
+label IF_END37
+push this 1
+push constant 2
+eq
+not
+if-goto IF_FALSE38
+push this 4
+push constant 4
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 5
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 6
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 10
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+goto IF_END39
+label IF_FALSE38
+label IF_END39
+push this 1
+push constant 3
+eq
+not
+if-goto IF_FALSE40
+push this 4
+push constant 1
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 5
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 8
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 9
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+goto IF_END41
+label IF_FALSE40
+label IF_END41
+push constant 0
+return
+function Tetromino.setShapeL 0
+push argument 0
+pop pointer 0
+push this 1
+push constant 0
+eq
+not
+if-goto IF_FALSE42
+push this 4
+push constant 2
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 4
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 5
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 6
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+goto IF_END43
+label IF_FALSE42
+label IF_END43
+push this 1
+push constant 1
+eq
+not
+if-goto IF_FALSE44
+push this 4
+push constant 1
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 5
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 9
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 10
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+goto IF_END45
+label IF_FALSE44
+label IF_END45
+push this 1
+push constant 2
+eq
+not
+if-goto IF_FALSE46
+push this 4
+push constant 4
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 5
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 6
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 8
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+goto IF_END47
+label IF_FALSE46
+label IF_END47
+push this 1
+push constant 3
+eq
+not
+if-goto IF_FALSE48
+push this 4
+push constant 0
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 1
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 5
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 4
+push constant 9
+add
+push constant 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+goto IF_END49
+label IF_FALSE48
+label IF_END49
+push constant 0
+return

@@ -1,0 +1,340 @@
+/**
+ * テトリスのゲームボードを管理するクラス
+ * ボードサイズ: 10列 x 20行
+ *
+ * 画面レイアウト（512x256ピクセル）:
+ *   左側: ゲームボード（10x20セル、各セル10x10ピクセル = 100x200ピクセル）
+ *   右側: スコアと次のピース表示
+ */
+class Board {
+    static int WIDTH;       // ボードの幅（セル数）
+    static int HEIGHT;      // ボードの高さ（セル数）
+    static int CELL_SIZE;   // セルのサイズ（ピクセル）
+    static int BOARD_X;     // ボード描画開始X座標
+    static int BOARD_Y;     // ボード描画開始Y座標
+
+    field Array grid;       // ボードのグリッド（WIDTH * HEIGHT）
+
+    /** 定数を初期化 */
+    function void init() {
+        let WIDTH = 10;
+        let HEIGHT = 20;
+        let CELL_SIZE = 10;
+        let BOARD_X = 50;
+        let BOARD_Y = 28;
+        return;
+    }
+
+    /** ボードの幅を取得 */
+    function int getWidth() {
+        return WIDTH;
+    }
+
+    /** ボードの高さを取得 */
+    function int getHeight() {
+        return HEIGHT;
+    }
+
+    /** 新しいボードを生成 */
+    constructor Board new() {
+        var int i;
+
+        let grid = Array.new(WIDTH * HEIGHT);
+
+        // グリッドを空で初期化
+        let i = 0;
+        while (i < (WIDTH * HEIGHT)) {
+            let grid[i] = 0;
+            let i = i + 1;
+        }
+
+        return this;
+    }
+
+    /** ボードを解放 */
+    method void dispose() {
+        do grid.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /** 指定位置のセルが埋まっているか確認 */
+    method boolean isCellFilled(int col, int row) {
+        if ((col < 0) | (col > (WIDTH - 1)) | (row < 0) | (row > (HEIGHT - 1))) {
+            return true;  // 範囲外は埋まっているとみなす
+        }
+        return grid[(row * WIDTH) + col] = 1;
+    }
+
+    /** 指定位置のセルを埋める */
+    method void setCell(int col, int row) {
+        if ((col > -1) & (col < WIDTH) & (row > -1) & (row < HEIGHT)) {
+            let grid[(row * WIDTH) + col] = 1;
+        }
+        return;
+    }
+
+    /** テトリミノとの衝突判定 */
+    method boolean checkCollision(Tetromino piece) {
+        var int row, col, boardX, boardY;
+        var int pieceX, pieceY;
+
+        let pieceX = piece.getX();
+        let pieceY = piece.getY();
+
+        let row = 0;
+        while (row < 4) {
+            let col = 0;
+            while (col < 4) {
+                if (piece.getCell(row, col)) {
+                    let boardX = pieceX + col;
+                    let boardY = pieceY + row;
+
+                    // 左右の壁との衝突
+                    if ((boardX < 0) | (boardX > (WIDTH - 1))) {
+                        return true;
+                    }
+
+                    // 床との衝突
+                    if (boardY > (HEIGHT - 1)) {
+                        return true;
+                    }
+
+                    // 既存ブロックとの衝突（Y >= 0の場合のみ）
+                    if (boardY > -1) {
+                        if (isCellFilled(boardX, boardY)) {
+                            return true;
+                        }
+                    }
+                }
+                let col = col + 1;
+            }
+            let row = row + 1;
+        }
+
+        return false;
+    }
+
+    /** テトリミノをボードに固定 */
+    method void lockPiece(Tetromino piece) {
+        var int row, col, boardX, boardY;
+        var int pieceX, pieceY;
+
+        let pieceX = piece.getX();
+        let pieceY = piece.getY();
+
+        let row = 0;
+        while (row < 4) {
+            let col = 0;
+            while (col < 4) {
+                if (piece.getCell(row, col)) {
+                    let boardX = pieceX + col;
+                    let boardY = pieceY + row;
+                    if ((boardY > -1) & (boardY < HEIGHT)) {
+                        do setCell(boardX, boardY);
+                    }
+                }
+                let col = col + 1;
+            }
+            let row = row + 1;
+        }
+
+        return;
+    }
+
+    /** 揃った行をクリアし、クリアした行数を返す */
+    method int clearLines() {
+        var int row, col, cleared, destRow;
+        var boolean full;
+
+        let cleared = 0;
+        let row = HEIGHT - 1;
+
+        while (row > -1) {
+            // 行が揃っているか確認
+            let full = true;
+            let col = 0;
+            while (col < WIDTH) {
+                if (~isCellFilled(col, row)) {
+                    let full = false;
+                }
+                let col = col + 1;
+            }
+
+            if (full) {
+                let cleared = cleared + 1;
+                // この行より上を下にシフト
+                let destRow = row;
+                while (destRow > 0) {
+                    let col = 0;
+                    while (col < WIDTH) {
+                        let grid[(destRow * WIDTH) + col] = grid[((destRow - 1) * WIDTH) + col];
+                        let col = col + 1;
+                    }
+                    let destRow = destRow - 1;
+                }
+                // 最上行をクリア
+                let col = 0;
+                while (col < WIDTH) {
+                    let grid[col] = 0;
+                    let col = col + 1;
+                }
+                // 同じ行を再チェック（シフトされた行も揃っている可能性）
+            } else {
+                let row = row - 1;
+            }
+        }
+
+        return cleared;
+    }
+
+    /** ボードを描画 */
+    method void draw() {
+        var int row, col, x, y;
+
+        // ボードの枠を描画
+        do Screen.setColor(true);
+        do Screen.drawRectangle(BOARD_X - 2, BOARD_Y - 2,
+                                 BOARD_X + (WIDTH * CELL_SIZE) + 1,
+                                 BOARD_Y + (HEIGHT * CELL_SIZE) + 1);
+        do Screen.setColor(false);
+        do Screen.drawRectangle(BOARD_X, BOARD_Y,
+                                 BOARD_X + (WIDTH * CELL_SIZE) - 1,
+                                 BOARD_Y + (HEIGHT * CELL_SIZE) - 1);
+
+        // グリッドのセルを描画
+        do Screen.setColor(true);
+        let row = 0;
+        while (row < HEIGHT) {
+            let col = 0;
+            while (col < WIDTH) {
+                if (isCellFilled(col, row)) {
+                    let x = BOARD_X + (col * CELL_SIZE);
+                    let y = BOARD_Y + (row * CELL_SIZE);
+                    do Screen.drawRectangle(x + 1, y + 1,
+                                             x + CELL_SIZE - 2, y + CELL_SIZE - 2);
+                }
+                let col = col + 1;
+            }
+            let row = row + 1;
+        }
+
+        return;
+    }
+
+    /** テトリミノを描画 */
+    method void drawPiece(Tetromino piece) {
+        var int row, col, x, y, boardX, boardY;
+        var int pieceX, pieceY;
+
+        let pieceX = piece.getX();
+        let pieceY = piece.getY();
+
+        do Screen.setColor(true);
+
+        let row = 0;
+        while (row < 4) {
+            let col = 0;
+            while (col < 4) {
+                if (piece.getCell(row, col)) {
+                    let boardX = pieceX + col;
+                    let boardY = pieceY + row;
+
+                    // ボード内のみ描画
+                    if ((boardX > -1) & (boardX < WIDTH) &
+                        (boardY > -1) & (boardY < HEIGHT)) {
+                        let x = BOARD_X + (boardX * CELL_SIZE);
+                        let y = BOARD_Y + (boardY * CELL_SIZE);
+                        do Screen.drawRectangle(x + 1, y + 1,
+                                                 x + CELL_SIZE - 2, y + CELL_SIZE - 2);
+                    }
+                }
+                let col = col + 1;
+            }
+            let row = row + 1;
+        }
+
+        return;
+    }
+
+    /** テトリミノを消去（再描画用） */
+    method void erasePiece(Tetromino piece) {
+        var int row, col, x, y, boardX, boardY;
+        var int pieceX, pieceY;
+
+        let pieceX = piece.getX();
+        let pieceY = piece.getY();
+
+        do Screen.setColor(false);
+
+        let row = 0;
+        while (row < 4) {
+            let col = 0;
+            while (col < 4) {
+                if (piece.getCell(row, col)) {
+                    let boardX = pieceX + col;
+                    let boardY = pieceY + row;
+
+                    // ボード内のみ消去
+                    if ((boardX > -1) & (boardX < WIDTH) &
+                        (boardY > -1) & (boardY < HEIGHT)) {
+                        let x = BOARD_X + (boardX * CELL_SIZE);
+                        let y = BOARD_Y + (boardY * CELL_SIZE);
+                        do Screen.drawRectangle(x + 1, y + 1,
+                                                 x + CELL_SIZE - 2, y + CELL_SIZE - 2);
+                    }
+                }
+                let col = col + 1;
+            }
+            let row = row + 1;
+        }
+
+        return;
+    }
+
+    /** 次のピースプレビューを描画 */
+    method void drawNextPiece(Tetromino piece) {
+        var int row, col, x, y;
+        var int previewX, previewY;
+
+        let previewX = 200;
+        let previewY = 100;
+
+        // プレビュー領域をクリア
+        do Screen.setColor(false);
+        do Screen.drawRectangle(previewX, previewY, previewX + 50, previewY + 50);
+
+        // ピースを描画
+        do Screen.setColor(true);
+        let row = 0;
+        while (row < 4) {
+            let col = 0;
+            while (col < 4) {
+                if (piece.getCell(row, col)) {
+                    let x = previewX + (col * 10);
+                    let y = previewY + (row * 10);
+                    do Screen.drawRectangle(x + 1, y + 1, x + 8, y + 8);
+                }
+                let col = col + 1;
+            }
+            let row = row + 1;
+        }
+
+        return;
+    }
+
+    /** ゲームオーバー判定（最上行にブロックがあるか） */
+    method boolean isGameOver() {
+        var int col;
+
+        let col = 0;
+        while (col < WIDTH) {
+            if (isCellFilled(col, 0)) {
+                return true;
+            }
+            let col = col + 1;
+        }
+
+        return false;
+    }
+}

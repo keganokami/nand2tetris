@@ -142,6 +142,45 @@ java -cp bin JackAnalyzer ../Jack/src/Square/
 java -cp bin JackCompiler ../Jack/src/Square/
 ```
 
+### OS - Jack OS（プロジェクト12）
+
+Jack言語で実装されたオペレーティングシステム。Hackコンピューター上でJackプログラムを実行するための基盤を提供します。
+
+```
+OS/
+├── src/                    # Jackソースコード
+│   ├── Math.jack           # 数学関数
+│   ├── String.jack         # 文字列操作
+│   ├── Array.jack          # 配列操作
+│   ├── Memory.jack         # メモリ管理
+│   ├── Screen.jack         # グラフィック描画
+│   ├── Output.jack         # テキスト出力
+│   ├── Keyboard.jack       # キーボード入力
+│   └── Sys.jack            # システムサービス
+├── docs/
+│   └── Chapter12.md        # 第12章の解説
+└── README.md
+```
+
+**実装機能:**
+- 数学演算（乗算、除算、平方根）
+- 文字列・配列操作
+- ヒープメモリ管理（動的割り当て）
+- グラフィック描画（点、線、矩形、円）
+- テキスト出力（8x11ピクセルフォント）
+- キーボード入力
+
+**使用方法:**
+```bash
+# JackCompilerでOSをコンパイル
+cd OS/src
+JackCompiler .
+
+# Jackプログラムと統合
+cp *.vm ../Jack/src/Square/
+JackCompiler ../Jack/src/Square/
+```
+
 ## コース概要
 
 [Nand2Tetris](https://www.nand2tetris.org/)は、NANDゲートからテトリスまで、コンピュータシステムを下から上まで構築する教育コースです。
@@ -159,7 +198,7 @@ java -cp bin JackCompiler ../Jack/src/Square/
 - ✅ プロジェクト9: 高級言語（Jack）
 - ✅ プロジェクト10: コンパイラ I - 構文解析（JackCompiler）
 - ✅ プロジェクト11: コンパイラ II - コード生成（JackCompiler）
-- ⬜ プロジェクト12: オペレーティングシステム
+- ✅ プロジェクト12: オペレーティングシステム（OS）
 
 ## 開発環境
 

@@ -1,0 +1,327 @@
+/**
+ * テトリミノ（テトリスのピース）を表すクラス
+ * 7種類のピース: I, O, T, S, Z, J, L
+ * 各ピースは4x4グリッドで表現し、4つの回転状態を持つ
+ */
+class Tetromino {
+    field int type;       // ピースの種類 (0-6)
+    field int rotation;   // 回転状態 (0-3)
+    field int x, y;       // ボード上の位置
+    field Array shape;    // 現在の形状（4x4 = 16要素）
+
+    /** 指定された種類のテトリミノを生成 */
+    constructor Tetromino new(int pieceType) {
+        let type = pieceType;
+        let rotation = 0;
+        let x = 3;  // 初期X位置（ボード中央付近）
+        let y = 0;  // 初期Y位置（上端）
+        let shape = Array.new(16);
+        do updateShape();
+        return this;
+    }
+
+    /** テトリミノを解放 */
+    method void dispose() {
+        do shape.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    /** X座標を取得 */
+    method int getX() {
+        return x;
+    }
+
+    /** Y座標を取得 */
+    method int getY() {
+        return y;
+    }
+
+    /** ピースの種類を取得 */
+    method int getType() {
+        return type;
+    }
+
+    /** 指定位置のセルが埋まっているかを取得 (row: 0-3, col: 0-3) */
+    method boolean getCell(int row, int col) {
+        return shape[(row * 4) + col] = 1;
+    }
+
+    /** 左に移動 */
+    method void moveLeft() {
+        let x = x - 1;
+        return;
+    }
+
+    /** 右に移動 */
+    method void moveRight() {
+        let x = x + 1;
+        return;
+    }
+
+    /** 下に移動 */
+    method void moveDown() {
+        let y = y + 1;
+        return;
+    }
+
+    /** 上に移動（衝突時の戻し用） */
+    method void moveUp() {
+        let y = y - 1;
+        return;
+    }
+
+    /** X座標を設定 */
+    method void setX(int newX) {
+        let x = newX;
+        return;
+    }
+
+    /** 時計回りに回転 */
+    method void rotateClockwise() {
+        let rotation = rotation + 1;
+        if (rotation > 3) {
+            let rotation = 0;
+        }
+        do updateShape();
+        return;
+    }
+
+    /** 反時計回りに回転 */
+    method void rotateCounterClockwise() {
+        let rotation = rotation - 1;
+        if (rotation < 0) {
+            let rotation = 3;
+        }
+        do updateShape();
+        return;
+    }
+
+    /** 現在の回転状態に基づいて形状を更新 */
+    method void updateShape() {
+        // すべてをクリア
+        var int i;
+        let i = 0;
+        while (i < 16) {
+            let shape[i] = 0;
+            let i = i + 1;
+        }
+
+        // 種類と回転に応じて形状を設定
+        if (type = 0) { do setShapeI(); }
+        if (type = 1) { do setShapeO(); }
+        if (type = 2) { do setShapeT(); }
+        if (type = 3) { do setShapeS(); }
+        if (type = 4) { do setShapeZ(); }
+        if (type = 5) { do setShapeJ(); }
+        if (type = 6) { do setShapeL(); }
+
+        return;
+    }
+
+    /** I型の形状を設定 */
+    method void setShapeI() {
+        if ((rotation = 0) | (rotation = 2)) {
+            // 横向き
+            // ....
+            // ####
+            // ....
+            // ....
+            let shape[4] = 1;
+            let shape[5] = 1;
+            let shape[6] = 1;
+            let shape[7] = 1;
+        } else {
+            // 縦向き
+            // .#..
+            // .#..
+            // .#..
+            // .#..
+            let shape[1] = 1;
+            let shape[5] = 1;
+            let shape[9] = 1;
+            let shape[13] = 1;
+        }
+        return;
+    }
+
+    /** O型の形状を設定（回転しても同じ） */
+    method void setShapeO() {
+        // .##.
+        // .##.
+        // ....
+        // ....
+        let shape[1] = 1;
+        let shape[2] = 1;
+        let shape[5] = 1;
+        let shape[6] = 1;
+        return;
+    }
+
+    /** T型の形状を設定 */
+    method void setShapeT() {
+        if (rotation = 0) {
+            // .#..
+            // ###.
+            // ....
+            let shape[1] = 1;
+            let shape[4] = 1;
+            let shape[5] = 1;
+            let shape[6] = 1;
+        }
+        if (rotation = 1) {
+            // .#..
+            // .##.
+            // .#..
+            let shape[1] = 1;
+            let shape[5] = 1;
+            let shape[6] = 1;
+            let shape[9] = 1;
+        }
+        if (rotation = 2) {
+            // ....
+            // ###.
+            // .#..
+            let shape[4] = 1;
+            let shape[5] = 1;
+            let shape[6] = 1;
+            let shape[9] = 1;
+        }
+        if (rotation = 3) {
+            // .#..
+            // ##..
+            // .#..
+            let shape[1] = 1;
+            let shape[4] = 1;
+            let shape[5] = 1;
+            let shape[9] = 1;
+        }
+        return;
+    }
+
+    /** S型の形状を設定 */
+    method void setShapeS() {
+        if ((rotation = 0) | (rotation = 2)) {
+            // .##.
+            // ##..
+            // ....
+            let shape[1] = 1;
+            let shape[2] = 1;
+            let shape[4] = 1;
+            let shape[5] = 1;
+        } else {
+            // #...
+            // ##..
+            // .#..
+            let shape[0] = 1;
+            let shape[4] = 1;
+            let shape[5] = 1;
+            let shape[9] = 1;
+        }
+        return;
+    }
+
+    /** Z型の形状を設定 */
+    method void setShapeZ() {
+        if ((rotation = 0) | (rotation = 2)) {
+            // ##..
+            // .##.
+            // ....
+            let shape[0] = 1;
+            let shape[1] = 1;
+            let shape[5] = 1;
+            let shape[6] = 1;
+        } else {
+            // .#..
+            // ##..
+            // #...
+            let shape[1] = 1;
+            let shape[4] = 1;
+            let shape[5] = 1;
+            let shape[8] = 1;
+        }
+        return;
+    }
+
+    /** J型の形状を設定 */
+    method void setShapeJ() {
+        if (rotation = 0) {
+            // #...
+            // ###.
+            // ....
+            let shape[0] = 1;
+            let shape[4] = 1;
+            let shape[5] = 1;
+            let shape[6] = 1;
+        }
+        if (rotation = 1) {
+            // .##.
+            // .#..
+            // .#..
+            let shape[1] = 1;
+            let shape[2] = 1;
+            let shape[5] = 1;
+            let shape[9] = 1;
+        }
+        if (rotation = 2) {
+            // ....
+            // ###.
+            // ..#.
+            let shape[4] = 1;
+            let shape[5] = 1;
+            let shape[6] = 1;
+            let shape[10] = 1;
+        }
+        if (rotation = 3) {
+            // .#..
+            // .#..
+            // ##..
+            let shape[1] = 1;
+            let shape[5] = 1;
+            let shape[8] = 1;
+            let shape[9] = 1;
+        }
+        return;
+    }
+
+    /** L型の形状を設定 */
+    method void setShapeL() {
+        if (rotation = 0) {
+            // ..#.
+            // ###.
+            // ....
+            let shape[2] = 1;
+            let shape[4] = 1;
+            let shape[5] = 1;
+            let shape[6] = 1;
+        }
+        if (rotation = 1) {
+            // .#..
+            // .#..
+            // .##.
+            let shape[1] = 1;
+            let shape[5] = 1;
+            let shape[9] = 1;
+            let shape[10] = 1;
+        }
+        if (rotation = 2) {
+            // ....
+            // ###.
+            // #...
+            let shape[4] = 1;
+            let shape[5] = 1;
+            let shape[6] = 1;
+            let shape[8] = 1;
+        }
+        if (rotation = 3) {
+            // ##..
+            // .#..
+            // .#..
+            let shape[0] = 1;
+            let shape[1] = 1;
+            let shape[5] = 1;
+            let shape[9] = 1;
+        }
+        return;
+    }
+}

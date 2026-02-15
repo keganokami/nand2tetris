@@ -1,0 +1,176 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Math.jack
+
+/**
+ * 基本的な数学関数を提供するライブラリ
+ * 乗算と除算はハードウェアでサポートされていないため、
+ * ソフトウェアで効率的に実装する
+ */
+class Math {
+    // 2のべき乗を格納する配列（ビット演算の高速化用）
+    static Array twoToThe;
+
+    /** Mathライブラリを初期化する */
+    function void init() {
+        var int i, val;
+
+        let twoToThe = Array.new(16);
+        let val = 1;
+        let i = 0;
+
+        while (i < 16) {
+            let twoToThe[i] = val;
+            let val = val + val;  // val * 2
+            let i = i + 1;
+        }
+
+        return;
+    }
+
+    /** xの絶対値を返す */
+    function int abs(int x) {
+        if (x < 0) {
+            return -x;
+        }
+        return x;
+    }
+
+    /**
+     * x * y の積を返す
+     * シフト加算アルゴリズムを使用（効率的な乗算）
+     *
+     * アルゴリズム:
+     * y の各ビットを調べ、ビットが1なら
+     * x を適切な量だけシフトした値を結果に加算
+     */
+    function int multiply(int x, int y) {
+        var int sum, shiftedX, i;
+
+        let sum = 0;
+        let shiftedX = x;
+        let i = 0;
+
+        while (i < 16) {
+            // y の i番目のビットが1かどうかを確認
+            if (Math.bit(y, i)) {
+                let sum = sum + shiftedX;
+            }
+            let shiftedX = shiftedX + shiftedX;  // shiftedX * 2
+            let i = i + 1;
+        }
+
+        return sum;
+    }
+
+    /**
+     * x / y の商（整数部分）を返す
+     * 再帰的な除算アルゴリズムを使用
+     * y = 0 の場合はエラー
+     */
+    function int divide(int x, int y) {
+        var int result;
+        var boolean negX, negY;
+
+        if (y = 0) {
+            do Sys.error(3);  // 0除算エラー
+            return 0;
+        }
+
+        // 符号を記録し、絶対値で計算
+        let negX = x < 0;
+        let negY = y < 0;
+
+        let x = Math.abs(x);
+        let y = Math.abs(y);
+
+        let result = Math.dividePositive(x, y);
+
+        // 符号を適用
+        if (negX = negY) {
+            return result;
+        }
+        return -result;
+    }
+
+    /**
+     * 正の整数の除算（内部関数）
+     * 再帰的アルゴリズム
+     */
+    function int dividePositive(int x, int y) {
+        var int q, doubleY;
+
+        // yがオーバーフローするか、x < y なら終了
+        if ((y > x) | (y < 0)) {
+            return 0;
+        }
+
+        let doubleY = y + y;
+        let q = Math.dividePositive(x, doubleY);
+        let q = q + q;
+
+        if ((x - Math.multiply(q, y)) < y) {
+            return q;
+        }
+        return q + 1;
+    }
+
+    /** min(x, y) を返す */
+    function int min(int x, int y) {
+        if (x < y) {
+            return x;
+        }
+        return y;
+    }
+
+    /** max(x, y) を返す */
+    function int max(int x, int y) {
+        if (x > y) {
+            return x;
+        }
+        return y;
+    }
+
+    /**
+     * sqrt(x) の整数部分を返す（x >= 0）
+     * 二分探索アルゴリズムを使用
+     */
+    function int sqrt(int x) {
+        var int y, j, temp, tempSquared;
+
+        if (x < 0) {
+            do Sys.error(4);  // 負の数の平方根エラー
+            return 0;
+        }
+
+        let y = 0;
+        let j = 7;  // 16ビット整数の場合、sqrt(32767) < 182 なので j は 7 から開始
+
+        while (j > -1) {
+            let temp = y + twoToThe[j];
+            let tempSquared = Math.multiply(temp, temp);
+
+            // オーバーフローチェック（負になった場合）とx以下のチェック
+            if ((tempSquared > 0) & ((tempSquared < x) | (tempSquared = x))) {
+                let y = temp;
+            }
+            let j = j - 1;
+        }
+
+        return y;
+    }
+
+    /**
+     * x の j番目のビットが1かどうかを返す
+     * (j = 0 が最下位ビット)
+     */
+    function boolean bit(int x, int j) {
+        return ~((x & twoToThe[j]) = 0);
+    }
+
+    /** 2^j を返す（内部使用） */
+    function int twoToThe(int j) {
+        return twoToThe[j];
+    }
+}

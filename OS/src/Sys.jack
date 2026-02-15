@@ -1,0 +1,101 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Sys.jack
+
+/**
+ * システムサービスを提供するライブラリ
+ * OSの初期化、プログラムの終了、エラー処理を行う
+ */
+class Sys {
+
+    /**
+     * OSを初期化し、Main.main()を呼び出す
+     * この関数はブートストラップコードから最初に呼ばれる
+     */
+    function void init() {
+        // 各OSモジュールを初期化（順序が重要）
+        do Memory.init();   // メモリ管理を最初に初期化
+        do Math.init();     // 数学関数
+        do Screen.init();   // 画面
+        do Output.init();   // テキスト出力
+        do Keyboard.init(); // キーボード
+
+        // ユーザープログラムのエントリーポイントを呼び出す
+        do Main.main();
+
+        // Main.main()が戻ったら停止
+        do Sys.halt();
+
+        return;
+    }
+
+    /**
+     * プログラムを停止する（無限ループに入る）
+     */
+    function void halt() {
+        while (true) {
+            // 何もしない
+        }
+        return;
+    }
+
+    /**
+     * 指定された時間（ミリ秒）待機する
+     * 注意: 実際の待機時間はCPU速度に依存する
+     *
+     * duration: 待機時間（ミリ秒）
+     */
+    function void wait(int duration) {
+        var int i, j;
+
+        if (duration < 0) {
+            do Sys.error(1);  // 待機時間が負
+            return;
+        }
+
+        // CPUサイクルを消費するループ
+        // この値はCPU速度によって調整が必要
+        let i = 0;
+        while (i < duration) {
+            let j = 0;
+            while (j < 100) {
+                let j = j + 1;
+            }
+            let i = i + 1;
+        }
+
+        return;
+    }
+
+    /**
+     * エラーコードを表示してプログラムを停止する
+     *
+     * エラーコード一覧:
+     *   1: Sys.wait の引数が負
+     *   2: Array.new のサイズが不正
+     *   3: Math.divide で0除算
+     *   4: Math.sqrt の引数が負
+     *   5: Memory.alloc のサイズが不正
+     *   6: Memory.alloc でメモリ不足
+     *   7: Screen.drawPixel の座標が範囲外
+     *   8: Screen.drawLine の座標が範囲外
+     *   9: Screen.drawRectangle の座標が範囲外
+     *   12: Screen.drawCircle の中心座標が範囲外
+     *   13: Screen.drawCircle の半径が不正
+     *   14: String.new の最大長が負
+     *   15: String.charAt のインデックスが範囲外
+     *   16: String.setCharAt のインデックスが範囲外
+     *   17: String.appendChar で文字列が満杯
+     *   18: String.eraseLastChar で文字列が空
+     *   20: Output.moveCursor のカーソル位置が範囲外
+     *
+     * errorCode: エラーコード
+     */
+    function void error(int errorCode) {
+        do Output.printString("ERR");
+        do Output.printInt(errorCode);
+        do Sys.halt();
+        return;
+    }
+}
